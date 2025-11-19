@@ -1,7 +1,8 @@
-import { useState, useRef, useEffect } from "react";
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthProvider';
+// src/pages/admin/FormCancha.jsx (ruta de ejemplo)
 
+import { useState, useRef, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../../context/AuthProvider";
 
 function FormCancha() {
   const { token } = useAuth();
@@ -20,44 +21,51 @@ function FormCancha() {
     fetch("http://localhost:8080/api/canchas/tipos", {
       headers: {
         Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
+        "Content-Type": "application/json",
+      },
     })
-      .then(res => res.json())
-      .then(data => setTiposCancha(data))
-      .catch(err => console.error("Error cargando tipos de cancha:", err));
-  }, []);
+      .then((res) => res.json())
+      .then((data) => setTiposCancha(data))
+      .catch((err) =>
+        console.error("Error cargando tipos de cancha:", err)
+      );
+  }, [token]);
 
   const [nombre, setNombre] = useState("");
   const [tipo, setTipo] = useState("");
   const [numero, setNumero] = useState("");
   const [dimensiones, setDimensiones] = useState("");
   const [imagen, setImagen] = useState(null);
-  const [jornadas, setJornadas] = useState([{ dia: "Lunes", inicio: "", fin: "", precio: "" }]);
+  const [jornadas, setJornadas] = useState([
+    { dia: "Lunes", inicio: "", fin: "", precio: "" },
+  ]);
 
   function convertirAHora12(hora24) {
     const [hora, minutos] = hora24.split(":");
     let h = parseInt(hora, 10);
     const sufijo = h >= 12 ? "p. m." : "a. m.";
-    h = h % 12 || 12; // convierte 0 a 12
+    h = h % 12 || 12;
     return `${h.toString().padStart(2, "0")}:${minutos} ${sufijo}`;
   }
 
   function diaAIdSemana(dia) {
     const mapDias = {
-      "Lunes": 1,
-      "Martes": 2,
-      "Miércoles": 3,
-      "Jueves": 4,
-      "Viernes": 5,
-      "Sábado": 6,
-      "Domingo": 7,
+      Lunes: 1,
+      Martes: 2,
+      Miércoles: 3,
+      Jueves: 4,
+      Viernes: 5,
+      Sábado: 6,
+      Domingo: 7,
     };
     return mapDias[dia] || 1;
   }
 
   const agregarJornada = () => {
-    setJornadas([...jornadas, { dia: "Lunes", inicio: "", fin: "", precio: "" }]);
+    setJornadas((prev) => [
+      ...prev,
+      { dia: "Lunes", inicio: "", fin: "", precio: "" },
+    ]);
   };
 
   const eliminarJornada = (index) => {
@@ -66,7 +74,6 @@ function FormCancha() {
     nuevas.splice(index, 1);
     setJornadas(nuevas);
   };
-
 
   const handleJornadaChange = (index, campo, valor) => {
     const nuevas = [...jornadas];
@@ -95,28 +102,27 @@ function FormCancha() {
       numeroCancha: parseInt(numero),
       tipoCanchaId: parseInt(tipo),
       lugarId: parseInt(lugarId),
-      jornadas: jornadas.map(j => ({
+      jornadas: jornadas.map((j) => ({
         horaInicio: convertirAHora12(j.inicio),
         horaFin: convertirAHora12(j.fin),
         precioPorHora: parseFloat(j.precio),
         semanaId: diaAIdSemana(j.dia),
-        estadoDisponibilidadId: 1
-      }))
+        estadoDisponibilidadId: 1,
+      })),
+      // dimensiones podría agregarse aquí cuando el backend lo soporte
     };
-
 
     try {
       const res = await fetch("http://localhost:8080/api/canchas", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       });
 
       if (res.ok) {
-
         setCreacionExitosa(true);
         setNombre("");
         setTipo("");
@@ -124,14 +130,19 @@ function FormCancha() {
         setDimensiones("");
         setImagen(null);
         setJornadas([{ dia: "Lunes", inicio: "", fin: "", precio: "" }]);
-        inputImagenRef.current.value = "";
+        if (inputImagenRef.current) inputImagenRef.current.value = "";
 
         setTimeout(() => {
           navigate(`/lugares/${lugarId}/canchas`);
         }, 1000);
       } else {
         const textoError = await res.text();
-        console.error("Error al crear cancha, status:", res.status, "respuesta:", textoError);
+        console.error(
+          "Error al crear cancha, status:",
+          res.status,
+          "respuesta:",
+          textoError
+        );
       }
     } catch (err) {
       console.error("Fallo de red:", err);
@@ -141,203 +152,293 @@ function FormCancha() {
   };
 
   return (
-    <div className="m-12">
-      <div className="w-full bg-white rounded-xl p-6 space-y-6">
-        <h2 className="text-2xl font-semibold text-[#213A58]">Crear una cancha</h2>
+    <div className="min-h-screen bg-[var(--canchitas-bg)] px-4 py-10 md:px-8">
+      <div className="max-w-4xl mx-auto canchitas-section">
+        {/* Encabezado */}
+        <header className="mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-[var(--canchitas-primary)]">
+            Crear una cancha
+          </h2>
+          <p className="mt-1 text-sm text-[var(--canchitas-text-muted)]">
+            Completa la información básica de la cancha y define las jornadas
+            disponibles con su precio por hora.
+          </p>
+        </header>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-sm font-semibold mb-1 texto-etiqueta text-black">Nombre de la cancha:</label>
-            <input
-              className="input input-bordered w-full bg-transparent text-[#213A58] border-black"
-              type="text"
-              value={nombre}
-              maxLength={70}
-              onChange={(e) => setNombre(e.target.value)}
-              required
-            />
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Datos básicos */}
+          <section className="space-y-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--canchitas-text-muted)]">
+              Datos de la cancha
+            </h3>
 
-          <div>
-            <label className="block text-sm font-semibold mb-1 texto-etiqueta text-black">Tipo de cancha:</label>
-            <select
-              className="select select-bordered w-full bg-transparent text-[#213A58] border-black"
-              value={tipo}
-              onChange={(e) => setTipo(e.target.value)}
-              required
-            >
-              <option value="">Seleccione un tipo</option>
-              {tiposCancha.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.nombre.replace("_", " ").toLowerCase()}
-                </option>
-              ))}
-            </select>
-          </div>
-
-
-          <div>
-            <label className="block text-sm font-semibold mb-1 texto-etiqueta text-black">Número de cancha:</label>
-            <input
-              className="input input-bordered w-full bg-transparent text-[#213A58] border-black"
-              type="text"
-              value={numero}
-              maxLength={40}
-              onChange={(e) => setNumero(e.target.value)}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold mb-1 texto-etiqueta text-black">Dimensiones:</label>
-            <input
-              className="input input-bordered w-full bg-transparent text-[#213A58] border-black"
-              type="text"
-              placeholder="Ej: 42m x 20m"
-              value={dimensiones}
-              maxLength={40}
-              onChange={(e) => setDimensiones(e.target.value)}
-            />
-          </div>
-
-          <div className=" text-black">
-            <p className="font-semibold texto-etiqueta">¿Cómo funciona la sección de jornadas?</p>
-            <p>En esta sección puedes ingresar los horarios disponibles para alquilar tu cancha y el precio por hora en ese rango de tiempo.</p>
-            <p>Por ejemplo, si ingresas una jornada de:</p>
-            <li>
-              Hora de inicio: 08:00 AM
-            </li>
-            <li>
-              Hora de fin: 11:00 AM
-            </li>
-            <li>
-              Precio por hora: $20
-            </li>
-            <p>El sistema automáticamente dividirá ese rango en bloques de una hora, generando 3 horarios disponibles para reservas:</p>
-            <li>
-              08:00 AM – 09:00 AM
-            </li>
-            <li>
-              09:00 AM – 10:00 AM
-            </li>
-            <li>
-              10:00 AM – 11:00 AM
-            </li>
-            <p>
-              Cada bloque se mostrará en el sistema con el precio de $20 por hora que hayas definido.
-            </p>
-            <p className="font-semibold texto-etiqueta">Recuerda</p>
-            <p>Puedes ingresar tantas jornadas como necesites para un mismo día. Esto te permite manejar precios diferentes según la hora (por ejemplo, más caro en la noche o los fines de semana).</p>
-          </div>
-
-          {jornadas.map((j, i) => (
-            <div key={i} className="grid grid-cols-1 md:grid-cols-5 gap-2 items-center justify-center mb-4 border-b pb-2">
+            <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label className="block text-xs texto-etiqueta text-black">Día</label>
+                <label className="block text-xs font-semibold mb-1 texto-etiqueta text-[var(--canchitas-text-muted)] uppercase tracking-wide">
+                  Nombre de la cancha
+                </label>
+                <input
+                  className="w-full rounded-full border border-slate-300 bg-white/80 px-4 py-2 text-sm text-[var(--canchitas-primary)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--canchitas-accent-soft)]"
+                  type="text"
+                  value={nombre}
+                  maxLength={70}
+                  onChange={(e) => setNombre(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1 texto-etiqueta text-[var(--canchitas-text-muted)] uppercase tracking-wide">
+                  Tipo de cancha
+                </label>
                 <select
-                  className="select select-bordered w-full bg-transparent text-[#213A58] border-black"
-                  value={j.dia}
-                  onChange={(e) => handleJornadaChange(i, "dia", e.target.value)}
+                  className="w-full rounded-full border border-slate-300 bg-white/80 px-4 py-2 text-sm text-[var(--canchitas-primary)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--canchitas-accent-soft)]"
+                  value={tipo}
+                  onChange={(e) => setTipo(e.target.value)}
+                  required
                 >
-                  <option>Lunes</option>
-                  <option>Martes</option>
-                  <option>Miércoles</option>
-                  <option>Jueves</option>
-                  <option>Viernes</option>
-                  <option>Sábado</option>
-                  <option>Domingo</option>
+                  <option value="">Seleccione un tipo</option>
+                  {tiposCancha.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.nombre.replace("_", " ").toLowerCase()}
+                    </option>
+                  ))}
                 </select>
               </div>
+
               <div>
-                <label className="block text-xs texto-etiqueta text-black">Horario de inicio</label>
+                <label className="block text-xs font-semibold mb-1 texto-etiqueta text-[var(--canchitas-text-muted)] uppercase tracking-wide">
+                  Número de cancha
+                </label>
                 <input
-                  type="time"
-                  className="input input-bordered w-full bg-transparent text-[#213A58] border-black"
-                  value={j.inicio}
-                  onChange={(e) => handleJornadaChange(i, "inicio", e.target.value)}
+                  className="w-full rounded-full border border-slate-300 bg-white/80 px-4 py-2 text-sm text-[var(--canchitas-primary)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--canchitas-accent-soft)]"
+                  type="text"
+                  value={numero}
+                  maxLength={40}
+                  onChange={(e) => setNumero(e.target.value)}
                 />
               </div>
+
               <div>
-                <label className="block text-xs texto-etiqueta text-black">Horario de fin</label>
+                <label className="block text-xs font-semibold mb-1 texto-etiqueta text-[var(--canchitas-text-muted)] uppercase tracking-wide">
+                  Dimensiones
+                </label>
                 <input
-                  type="time"
-                  className="input input-bordered w-full bg-transparent text-[#213A58] border-black"
-                  value={j.fin}
-                  onChange={(e) => handleJornadaChange(i, "fin", e.target.value)}
+                  className="w-full rounded-full border border-slate-300 bg-white/80 px-4 py-2 text-sm text-[var(--canchitas-primary)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--canchitas-accent-soft)]"
+                  type="text"
+                  placeholder="Ej: 42m x 20m"
+                  value={dimensiones}
+                  maxLength={40}
+                  onChange={(e) => setDimensiones(e.target.value)}
                 />
-              </div>
-              <div>
-                <label className="block text-xs texto-etiqueta text-black">Precio por hora</label>
-                <div className="flex items-center">
-                  <span className="px-2 text-sm text-gray-600">$</span>
-                  <input
-                    type="number"
-                    min="0"
-                    className="input input-bordered w-full bg-transparent text-[#213A58] border-black"
-                    value={j.precio}
-                    onChange={(e) => handleJornadaChange(i, "precio", e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2">
-                <div className="flex grid-row-2 gap-2 ml-6">
-                {jornadas.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => eliminarJornada(i)}
-                    className="btn btn-circle btn-error btn-sm text-lg boton-eliminar"
-                    title="Eliminar jornada"
-                  >
-                    −
-                  </button>
-                )}
-              </div>
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={agregarJornada}
-                  className="btn btn-circle btn-sm text-lg boton-agregar bg-green-300"
-                >
-                  +
-                </button>
-              </div>
               </div>
             </div>
-          ))}
+          </section>
 
-          <div>
-            <label className="block text-sm font-semibold mt-6 mb-1 texto-etiqueta text-black">Foto de la cancha</label>
+          {/* Explicación jornadas */}
+          <section className="space-y-3">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--canchitas-text-muted)]">
+              Jornadas y precios
+            </h3>
+
+            <div className="rounded-2xl border border-slate-200 bg-[var(--canchitas-bg)] px-4 py-3 text-sm text-[var(--canchitas-text-muted)] space-y-1">
+              <p className="font-semibold texto-etiqueta text-[var(--canchitas-primary)]">
+                ¿Cómo funciona la sección de jornadas?
+              </p>
+              <p>
+                En cada jornada defines un{" "}
+                <strong>día, rango horario y precio por hora</strong>.
+                El sistema divide automáticamente ese rango en bloques de una
+                hora.
+              </p>
+              <p className="text-xs mt-1">
+                Ejemplo: si indicas inicio 08:00 y fin 11:00 con precio
+                <strong> $20</strong>, se generan estos horarios:
+              </p>
+              <ul className="list-disc list-inside text-xs">
+                <li>08:00 – 09:00</li>
+                <li>09:00 – 10:00</li>
+                <li>10:00 – 11:00</li>
+              </ul>
+              <p className="text-xs mt-1">
+                Puedes crear varias jornadas para el mismo día, por ejemplo
+                precios distintos en la noche o fines de semana.
+              </p>
+            </div>
+          </section>
+
+          {/* Jornadas */}
+          <section className="space-y-4">
+            {jornadas.map((j, i) => (
+              <article
+                key={i}
+                className="rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 space-y-3"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-[var(--canchitas-primary)]">
+                    Jornada {i + 1}
+                  </p>
+                  {jornadas.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => eliminarJornada(i)}
+                      className="text-xs rounded-full border border-rose-200 bg-rose-50 px-3 py-1 font-medium text-rose-700 hover:bg-rose-100"
+                      title="Eliminar jornada"
+                    >
+                      Eliminar
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid gap-3 md:grid-cols-4">
+                  <div>
+                    <label className="block text-xs texto-etiqueta text-[var(--canchitas-text-muted)] uppercase tracking-wide mb-1">
+                      Día
+                    </label>
+                    <select
+                      className="w-full rounded-full border border-slate-300 bg-white/80 px-3 py-2 text-sm text-[var(--canchitas-primary)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--canchitas-accent-soft)]"
+                      value={j.dia}
+                      onChange={(e) =>
+                        handleJornadaChange(i, "dia", e.target.value)
+                      }
+                    >
+                      <option>Lunes</option>
+                      <option>Martes</option>
+                      <option>Miércoles</option>
+                      <option>Jueves</option>
+                      <option>Viernes</option>
+                      <option>Sábado</option>
+                      <option>Domingo</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs texto-etiqueta text-[var(--canchitas-text-muted)] uppercase tracking-wide mb-1">
+                      Hora inicio
+                    </label>
+                    <input
+                      type="time"
+                      className="w-full rounded-full border border-slate-300 bg-white/80 px-3 py-2 text-sm text-[var(--canchitas-primary)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--canchitas-accent-soft)]"
+                      value={j.inicio}
+                      onChange={(e) =>
+                        handleJornadaChange(i, "inicio", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs texto-etiqueta text-[var(--canchitas-text-muted)] uppercase tracking-wide mb-1">
+                      Hora fin
+                    </label>
+                    <input
+                      type="time"
+                      className="w-full rounded-full border border-slate-300 bg-white/80 px-3 py-2 text-sm text-[var(--canchitas-primary)] shadow-sm focus:outline-none focus:ring-2 focus:ring-[var(--canchitas-accent-soft)]"
+                      value={j.fin}
+                      onChange={(e) =>
+                        handleJornadaChange(i, "fin", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs texto-etiqueta text-[var(--canchitas-text-muted)] uppercase tracking-wide mb-1">
+                      Precio por hora
+                    </label>
+                    <div className="flex items-center rounded-full border border-slate-300 bg-white/80 px-3 py-2 text-sm shadow-sm focus-within:ring-2 focus-within:ring-[var(--canchitas-accent-soft)]">
+                      <span className="mr-2 text-[var(--canchitas-text-muted)]">
+                        $
+                      </span>
+                      <input
+                        type="number"
+                        min="0"
+                        className="w-full bg-transparent text-[var(--canchitas-primary)] outline-none"
+                        value={j.precio}
+                        onChange={(e) =>
+                          handleJornadaChange(i, "precio", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={agregarJornada}
+                className="rounded-full bg-[var(--canchitas-accent-soft)] px-4 py-2 text-sm font-medium text-[var(--canchitas-accent)] hover:bg-[var(--canchitas-accent)] hover:text-white transition-colors"
+              >
+                + Añadir jornada
+              </button>
+            </div>
+          </section>
+
+          {/* Imagen */}
+          <section className="space-y-3">
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--canchitas-text-muted)]">
+              Foto de la cancha
+            </h3>
+            <label className="block text-xs font-semibold mb-1 texto-etiqueta text-[var(--canchitas-text-muted)] uppercase tracking-wide">
+              Imagen principal
+            </label>
             <input
               type="file"
               accept="image/*"
               onChange={handleImagenChange}
               ref={inputImagenRef}
-              className="file-input file-input-bordered w-full bg-transparent text-[#213A58] border-black"
+              className="w-full rounded-2xl border border-dashed border-slate-300 bg-white/60 px-4 py-3 text-sm text-[var(--canchitas-primary)] file:mr-4 file:rounded-full file:border-0 file:bg-[var(--canchitas-primary-soft)] file:px-4 file:py-1 file:text-xs file:font-semibold file:text-[var(--canchitas-primary)] hover:file:bg-[var(--canchitas-primary)] hover:file:text-white"
             />
 
             {imagen && (
-              <div className="mt-4">
-                <p className="text-sm text-gray-600">Previsualización:</p>
+              <div className="mt-3">
+                <p className="text-xs text-[var(--canchitas-text-muted)]">
+                  Previsualización:
+                </p>
                 <img
                   src={URL.createObjectURL(imagen)}
                   alt="Previsualización"
-                  className="h-40 object-cover rounded border mt-2"
+                  className="mt-2 h-40 w-full max-w-sm rounded-2xl border border-slate-200 object-cover"
                 />
               </div>
             )}
-          </div>
+          </section>
 
-          <div className="flex justify-end gap-2 mt-6">
-            <button type="button" className="btn boton-cancelar" onClick={() => navigate(-1)}>Cancelar</button>
-            <button type="submit" className="btn btn-primary boton-crear">Crear</button>
+          {/* Botones */}
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="rounded-full border border-slate-300 px-5 py-2 text-sm font-medium text-[var(--canchitas-text)] hover:bg-slate-50"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="rounded-full bg-[var(--canchitas-accent)] px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--canchitas-accent-strong)]"
+            >
+              Crear cancha
+            </button>
           </div>
         </form>
 
+        {/* Mensaje de éxito */}
         {creacionExitosa && (
-          <div role="alert" className="alert alert-success mt-4 shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 shrink-0 stroke-current" fill="none" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 shrink-0 stroke-current"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
             </svg>
-            <span>¡Creada con éxito!.</span>
+            <span>¡Cancha creada con éxito!</span>
           </div>
         )}
       </div>
@@ -345,4 +446,4 @@ function FormCancha() {
   );
 }
 
-export default FormCancha; 
+export default FormCancha;

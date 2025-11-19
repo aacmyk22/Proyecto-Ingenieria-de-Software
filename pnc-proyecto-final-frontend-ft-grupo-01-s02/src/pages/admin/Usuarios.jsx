@@ -1,6 +1,8 @@
+// src/pages/admin/Usuarios.jsx  (ajusta la ruta si la tienes distinta)
+
 import { useState, useEffect } from "react";
-import CardUsuario from "../../components/CardUsuarios";
 import { useNavigate } from "react-router-dom";
+import CardUsuario from "../../components/CardUsuarios";
 import { useAuth } from "../../context/AuthProvider";
 
 function Usuarios() {
@@ -27,22 +29,24 @@ function Usuarios() {
 
         const data = await response.json();
 
-        const soloClientes = data.filter(usuario => usuario.rol === "CLIENTE");
-
-        setUsuarios(soloClientes)
+        // Solo clientes
+        const soloClientes = data.filter((usuario) => usuario.rol === "CLIENTE");
+        setUsuarios(soloClientes);
       } catch (error) {
         console.error("Error:", error);
       }
     };
 
-    fetchUsuarios();
+    if (token) {
+      fetchUsuarios();
+    }
   }, [token]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [pagina]);
 
-  const totalPaginas = Math.ceil(usuarios.length / porPagina);
+  const totalPaginas = Math.ceil(usuarios.length / porPagina) || 1;
   const inicio = (pagina - 1) * porPagina;
   const usuariosPaginados = usuarios.slice(inicio, inicio + porPagina);
 
@@ -51,16 +55,21 @@ function Usuarios() {
   };
 
   const handleEliminar = async (usuarioId) => {
-    const confirmar = window.confirm("¿Estás seguro de que deseas eliminar este usuario?");
+    const confirmar = window.confirm(
+      "¿Estás seguro de que deseas eliminar este usuario?"
+    );
     if (!confirmar) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/usuarios/${usuarioId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:8080/api/usuarios/${usuarioId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const data = await response.json();
 
@@ -78,11 +87,22 @@ function Usuarios() {
   };
 
   return (
-    <div className="m-12">
-      <div className="w-full bg-white rounded-xl p-6 space-y-6">
-        <h1 className="text-2xl font-semibold text-[#213A58]">Usuarios</h1>
+    <div className="min-h-screen bg-[var(--canchitas-bg)] px-4 py-10 md:px-8">
+      <div className="max-w-5xl mx-auto canchitas-section">
+        {/* Header */}
+        <header className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-[var(--canchitas-primary)]">
+              Usuarios
+            </h1>
+            <p className="text-sm text-[var(--canchitas-text-muted)] mt-1">
+              Listado de clientes registrados en la plataforma.
+            </p>
+          </div>
+        </header>
 
-        <div className="space-y-4">
+        {/* Lista de usuarios */}
+        <section className="space-y-4">
           {usuariosPaginados.map((usuario, index) => (
             <CardUsuario
               key={usuario.idUsuario}
@@ -98,26 +118,29 @@ function Usuarios() {
           ))}
 
           {usuarios.length === 0 && (
-            <p className="text-gray-600">No hay usuarios disponibles.</p>
+            <div className="mt-4 rounded-2xl border border-dashed border-black/20 bg-white/60 px-4 py-6 text-center text-sm text-[var(--canchitas-text-muted)]">
+              No hay usuarios registrados como clientes en este momento.
+            </div>
           )}
-        </div>
+        </section>
 
-        {totalPaginas > 1 && (
-          <div className="flex justify-center items-center space-x-4 pt-4">
+        {/* Paginación */}
+        {usuarios.length > 0 && totalPaginas > 1 && (
+          <div className="mt-6 flex justify-center items-center gap-4">
             <button
-              onClick={() => setPagina(pagina - 1)}
+              onClick={() => setPagina((prev) => prev - 1)}
               disabled={pagina === 1}
-              className="px-4 py-2 bg-white border border-gray-400 text-gray-900 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center rounded-full border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-[var(--canchitas-primary)] hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Anterior
             </button>
-            <span className="text-gray-800 font-medium">
+            <span className="text-sm font-medium text-[var(--canchitas-primary)]">
               Página {pagina} de {totalPaginas}
             </span>
             <button
-              onClick={() => setPagina(pagina + 1)}
+              onClick={() => setPagina((prev) => prev + 1)}
               disabled={pagina === totalPaginas}
-              className="px-4 py-2 bg-white border border-gray-400 text-gray-900 rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center rounded-full border border-black/20 bg-white px-4 py-2 text-sm font-semibold text-[var(--canchitas-primary)] hover:bg-black/5 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Siguiente
             </button>
