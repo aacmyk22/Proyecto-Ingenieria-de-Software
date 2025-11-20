@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthProvider";
+import api from "../config/api";
 
 import Input from "../components/Input";
 import Button from "../components/Button";
@@ -42,22 +43,9 @@ function InicioSesion() {
     setErrores({});
 
     try {
-      const response = await fetch("http://localhost:8080/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ correo, contrasena }),
-      });
+      const response = await api.post("/api/auth/login", { correo, contrasena });
+      const data = response.data;
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        alert(errorData.mensaje || "Error al iniciar sesión");
-        console.error("Respuesta no OK:", errorData);
-        return;
-      }
-
-      const data = await response.json();
       console.log("Respuesta del backend:", data);
 
       if (!data.token || !data.role) {
@@ -73,8 +61,9 @@ function InicioSesion() {
 
       navigate("/", { replace: true });
     } catch (error) {
-      console.error("Error de red:", error);
-      alert("Error de red al intentar iniciar sesión.");
+      console.error("Error al iniciar sesión:", error);
+      const mensaje = error.response?.data?.mensaje || "Error al iniciar sesión";
+      alert(mensaje);
     }
   };
 

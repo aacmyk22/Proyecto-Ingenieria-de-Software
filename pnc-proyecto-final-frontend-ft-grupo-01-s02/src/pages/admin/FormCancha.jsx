@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
+import api from "../../config/api";
 
 function FormCancha() {
   const { token } = useAuth();
@@ -18,14 +19,8 @@ function FormCancha() {
   const [tiposCancha, setTiposCancha] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/canchas/tipos", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => setTiposCancha(data))
+    api.get("/api/canchas/tipos")
+      .then((res) => setTiposCancha(res.data))
       .catch((err) =>
         console.error("Error cargando tipos de cancha:", err)
       );
@@ -113,16 +108,9 @@ function FormCancha() {
     };
 
     try {
-      const res = await fetch("http://localhost:8080/api/canchas", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
+      const res = await api.post("/api/canchas", body);
 
-      if (res.ok) {
+      if (res.status === 200 || res.status === 201) {
         setCreacionExitosa(true);
         setNombre("");
         setTipo("");
@@ -135,17 +123,11 @@ function FormCancha() {
         setTimeout(() => {
           navigate(`/lugares/${lugarId}/canchas`);
         }, 1000);
-      } else {
-        const textoError = await res.text();
-        console.error(
-          "Error al crear cancha, status:",
-          res.status,
-          "respuesta:",
-          textoError
-        );
       }
     } catch (err) {
-      console.error("Fallo de red:", err);
+      console.error("Error al crear cancha:", err);
+      const mensaje = err.response?.data?.mensaje || "Error al crear la cancha";
+      alert(mensaje);
     }
 
     setTimeout(() => setCreacionExitosa(false), 5000);

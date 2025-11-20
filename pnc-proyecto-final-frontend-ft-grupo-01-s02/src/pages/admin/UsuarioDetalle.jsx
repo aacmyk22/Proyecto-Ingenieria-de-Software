@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
 import CardReserva from "../../components/CardReserva";
+import api from "../../config/api";
 
 function UsuarioDetalle() {
   const navigate = useNavigate();
@@ -17,17 +18,16 @@ function UsuarioDetalle() {
   useEffect(() => {
     if (!id || !token) return;
 
-    fetch(`http://localhost:8080/api/reservas/usuario/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Error al cargar reservas");
-        return res.json();
-      })
-      .then((data) => setReservas(data))
-      .catch((err) => console.error("Error:", err));
+    const fetchReservas = async () => {
+      try {
+        const res = await api.get(`/api/reservas/usuario/${id}`);
+        setReservas(res.data);
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    };
+
+    fetchReservas();
   }, [id, token]);
 
   const totalPaginas = Math.ceil(reservas.length / porPagina) || 1;

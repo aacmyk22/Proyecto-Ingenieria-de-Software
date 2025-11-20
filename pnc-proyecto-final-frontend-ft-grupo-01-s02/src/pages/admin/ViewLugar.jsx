@@ -1,8 +1,9 @@
-// src/pages/admin/ViewLugar.jsx  
+// src/pages/admin/ViewLugar.jsx
 
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
+import api from "../../config/api";
 
 export default function ViewLugares() {
   const { token } = useAuth();
@@ -16,19 +17,8 @@ export default function ViewLugares() {
   // Obtener lugares del backend
   const fetchLugares = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/lugares", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Error al cargar los lugares");
-      }
-
-      const data = await response.json();
-      setLugares(data);
+      const res = await api.get("/api/lugares");
+      setLugares(res.data);
     } catch (error) {
       console.error("Error al cargar los lugares:", error);
     }
@@ -48,22 +38,10 @@ export default function ViewLugares() {
     if (!confirmacion) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/lugares/${id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        setLugares((prev) => prev.filter((l) => l.idLugar !== id));
-        setAlertaEliminado(true);
-        setTimeout(() => setAlertaEliminado(false), 2000);
-      } else {
-        setAlertaError(true);
-        setTimeout(() => setAlertaError(false), 2000);
-      }
+      await api.delete(`/api/lugares/${id}`);
+      setLugares((prev) => prev.filter((l) => l.idLugar !== id));
+      setAlertaEliminado(true);
+      setTimeout(() => setAlertaEliminado(false), 2000);
     } catch (error) {
       console.error("Error al hacer la solicitud DELETE:", error);
       setAlertaError(true);

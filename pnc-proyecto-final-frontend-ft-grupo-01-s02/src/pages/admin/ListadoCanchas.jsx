@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
+import api from "../../config/api";
 
 const diasSemana = [
   "LUNES",
@@ -31,14 +32,9 @@ function ListadoCanchas() {
   useEffect(() => {
     if (!token) return;
 
-    fetch(`http://localhost:8080/api/lugares/${id}/canchas`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    api.get(`/api/lugares/${id}/canchas`)
+      .then((res) => {
+        const data = res.data;
         setCanchas(data);
         data.forEach((cancha) => {
           const diaInicial = "LUNES";
@@ -50,28 +46,19 @@ function ListadoCanchas() {
         });
       })
       .catch((err) => console.error("Error cargando canchas:", err));
-  }, [id, token]); // 👈 mismos datos, sólo se añade token
+  }, [id, token]);
 
   const cargarJornadas = async (canchaId, dia) => {
     try {
-      const res = await fetch(
-        `http://localhost:8080/api/canchas/${canchaId}/jornadas?dia=${dia}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setJornadasPorCancha((prev) => ({
-          ...prev,
-          [canchaId]: {
-            ...(prev[canchaId] || {}),
-            [dia]: data,
-          },
-        }));
-      }
+      const res = await api.get(`/api/canchas/${canchaId}/jornadas?dia=${dia}`);
+      const data = res.data;
+      setJornadasPorCancha((prev) => ({
+        ...prev,
+        [canchaId]: {
+          ...(prev[canchaId] || {}),
+          [dia]: data,
+        },
+      }));
     } catch (err) {
       console.error(
         `Error cargando jornadas de cancha ${canchaId} para el día ${dia}:`,
@@ -92,27 +79,12 @@ function ListadoCanchas() {
     if (!confirmacion) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/canchas/${canchaId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (response.ok) {
-        setCanchas((prev) => prev.filter((c) => c.id !== canchaId));
-        setAlertaEliminado(true);
-        setTimeout(() => setAlertaEliminado(false), 2000);
-      } else {
-        setAlertaError(true);
-        setTimeout(() => setAlertaError(false), 2000);
-      }
+      await api.delete(`/api/canchas/${canchaId}`);
+      setCanchas((prev) => prev.filter((c) => c.id !== canchaId));
+      setAlertaEliminado(true);
+      setTimeout(() => setAlertaEliminado(false), 2000);
     } catch (error) {
-      console.error("Error al hacer la solicitud DELETE:", error);
+      console.error("Error al eliminar cancha:", error);
       setAlertaError(true);
       setTimeout(() => setAlertaError(false), 2000);
     }
