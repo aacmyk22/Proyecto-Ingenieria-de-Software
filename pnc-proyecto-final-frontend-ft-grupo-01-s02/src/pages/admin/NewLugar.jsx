@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
+import api from "../../config/api";
 
 export default function NewLugar() {
   const { token } = useAuth();
@@ -25,13 +26,8 @@ export default function NewLugar() {
   useEffect(() => {
     const fetchZonas = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/lugares/zonas", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        const data = await response.json();
-        setZonasDisponibles(data);
+        const res = await api.get("/api/lugares/zonas");
+        setZonasDisponibles(res.data);
       } catch (error) {
         console.error("Error al cargar zonas:", error);
       }
@@ -74,26 +70,13 @@ export default function NewLugar() {
     };
 
     try {
-      const response = await fetch("http://localhost:8080/api/lugares", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(nuevoLugar),
-      });
-
-      if (response.ok) {
-        setSuccess(true);
-        setTimeout(() => {
-          navigate("/lugares");
-        }, 1000);
-      } else {
-        const textoError = await response.text();
-        console.error("Error al crear el lugar:", textoError);
-      }
+      await api.post("/api/lugares", nuevoLugar);
+      setSuccess(true);
+      setTimeout(() => {
+        navigate("/lugares");
+      }, 1000);
     } catch (error) {
-      console.error("Error en POST:", error);
+      console.error("Error al crear el lugar:", error.response?.data?.mensaje || error.message);
     }
   };
 

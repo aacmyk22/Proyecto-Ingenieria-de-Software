@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
+import api from "../../config/api";
 
 function getEstadoStyles(estado = "") {
   const normalized = estado.toUpperCase();
@@ -38,20 +39,8 @@ function MisReservaciones() {
         setCargando(true);
         setError(null);
 
-        const res = await fetch(
-          `http://localhost:8080/api/reservas/${usuario.idUsuario}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!res.ok) {
-          throw new Error("Error al cargar reservas");
-        }
-
-        const data = await res.json();
+        const res = await api.get(`/api/reservas/${usuario.idUsuario}`);
+        const data = res.data;
         setReservas(Array.isArray(data) ? data : []);
       } catch (err) {
         console.error(err);
