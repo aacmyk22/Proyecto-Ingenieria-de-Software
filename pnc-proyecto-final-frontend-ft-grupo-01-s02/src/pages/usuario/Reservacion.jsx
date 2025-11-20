@@ -1,4 +1,4 @@
-// src/pages/usuario/Reservacion.jsx
+// src/pages/reservas/Reservacion.jsx
 
 import { useEffect, useState } from "react";
 import Dropdown from "../../components/Dropdown";
@@ -42,7 +42,7 @@ function Reservacion() {
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
 
-  // Información de la cancha
+  // Información de la cancha (temporal - debería venir de la API)
   const [canchaInfo, setCanchaInfo] = useState({
     nombre: "Cancha Fútbol 5",
     lugar: "Complejo Deportivo A",
@@ -50,24 +50,34 @@ function Reservacion() {
     precioPorHora: 10.0,
   });
 
-  // Usuario (debería venir del contexto)
+  // Usuario (debería venir del contexto de autenticación)
   const usuario = {
     nombre: "Jennifer López",
     correo: "jenn@example.com",
   };
 
-  // CARGAR ZONAS al montar
-  useEffect(() => {
-    console.log("🚀 Componente montado");
-    cargarZonas();
-    cargarTiposCanchas();
-    cargarMetodosPago();
-  }, []);
+  // ✅ CARGAR ZONAS al montar el componente
+ useEffect(() => {
+  console.log("🚀 Componente montado");
+  cargarZonas();
+  cargarTiposCanchas();  
+  cargarMetodosPago();
+}, []);
 
-  // CARGAR LUGARES cuando cambia la zona
+// ✅ CARGAR CANCHAS cuando cambia el lugar
+useEffect(() => {
+  if (lugarSeleccionado) {
+    console.log("🏢 Lugar seleccionado:", lugarSeleccionado);
+    cargarCanchas(lugarSeleccionado);
+  } else {
+    setOpcionesCanchas([]);
+    setCanchaSeleccionada("");
+  }
+}, [lugarSeleccionado]);
+
+  // ✅ CARGAR LUGARES cuando cambia la zona
   useEffect(() => {
     if (zonaSeleccionada) {
-      console.log("📍 Zona seleccionada:", zonaSeleccionada);
       cargarLugares(zonaSeleccionada);
     } else {
       setOpcionesLugares([]);
@@ -75,161 +85,169 @@ function Reservacion() {
     }
   }, [zonaSeleccionada]);
 
-  // CARGAR CANCHAS cuando cambia el lugar
+  // ✅ CARGAR CANCHAS cuando cambia el tipo de cancha
   useEffect(() => {
-    if (lugarSeleccionado) {
-      console.log("🏢 Lugar seleccionado:", lugarSeleccionado);
-      cargarCanchas(lugarSeleccionado);
+    if (tipoCanchaSeleccionado) {
+      cargarCanchas(tipoCanchaSeleccionado, lugarSeleccionado);
     } else {
       setOpcionesCanchas([]);
       setCanchaSeleccionada("");
     }
-  }, [lugarSeleccionado]);
+  }, [tipoCanchaSeleccionado]);
 
-  // CARGAR FECHAS OCUPADAS cuando cambia la cancha
+  // ✅ CARGAR FECHAS OCUPADAS cuando cambia la cancha
   useEffect(() => {
     if (canchaSeleccionada) {
-      console.log("🎯 Cancha seleccionada:", canchaSeleccionada);
       cargarFechasOcupadas(canchaSeleccionada);
     }
   }, [canchaSeleccionada]);
 
-  // CARGAR HORARIOS OCUPADOS cuando cambia la fecha
+  // ✅ CARGAR HORARIOS OCUPADOS cuando cambia la fecha
   useEffect(() => {
     if (selectedDate && canchaSeleccionada) {
       const fechaStr = selectedDate.toISOString().split("T")[0];
-      console.log("📅 Fecha seleccionada:", fechaStr);
       cargarHorasOcupadas(canchaSeleccionada, fechaStr);
-      setSelectedHours([]);
+      setSelectedHours([]); // reiniciar selección
     }
   }, [selectedDate, canchaSeleccionada]);
 
-  // 🔌 FUNCIONES PARA LLAMAR A LA API (RUTAS AJUSTADAS)
+  // 🔌 FUNCIONES PARA LLAMAR A LA API
 
   const cargarZonas = async () => {
     try {
-      console.log("📡 GET /api/zonas");
       setCargando(true);
       const response = await api.get('/api/zonas');
-      console.log("✅ Zonas:", response.data);
-      
-const zonasFormateadas = response.data.map(zona => ({
-  label: zona.nombre,
-  value: zona.id
-}));
+      // Mapear la respuesta al formato { label, value }
+      const zonasFormateadas = response.data.map(zona => ({
+        label: zona.nombre,
+        value: zona.id
+      }));
       setOpcionesZonas(zonasFormateadas);
     } catch (err) {
-      console.error('❌ Error zonas:', err);
-      const respaldo = [
-        { label: "San Salvador", value: 1 },
-        { label: "Santa Tecla", value: 2 },
-      ];
-      setOpcionesZonas(respaldo);
-    } finally {
-      setCargando(false);
-    }
-  };
-
-  const cargarLugares = async (zonaId) => {
-    try {
-      console.log(`📡 GET /api/zonas/${zonaId}/lugares`);
-      setCargando(true);
-      const response = await api.get(`/api/zonas/${zonaId}/lugares`);
-      console.log("✅ Lugares:", response.data);
-      
-const lugaresFormateados = response.data.map(lugar => ({
-  label: lugar.nombre,
-  value: lugar.id
-}));
-      setOpcionesLugares(lugaresFormateados);
-    } catch (err) {
-      console.error('❌ Error lugares:', err);
-      setOpcionesLugares([]);
-    } finally {
-      setCargando(false);
-    }
-  };
-
-  const cargarTiposCanchas = async () => {
-    try {
-      console.log("📡 GET /api/canchas/tipos");
-      const response = await api.get('/api/canchas/tipos');
-      console.log("✅ Tipos de cancha:", response.data);
-      
-const tiposFormateados = response.data.map(tipo => ({
-  label: tipo.tipo || tipo.nombre,  // tipo.tipo viene del enum
-  value: tipo.id
-}));
-      setOpcionesTipoCancha(tiposFormateados);
-    } catch (err) {
-      console.error('❌ Error tipos cancha:', err);
-      setOpcionesTipoCancha([
-        { label: "Fútbol 5", value: 1 },
-        { label: "Fútbol 7", value: 2 },
+      console.error('Error al cargar zonas:', err);
+      setError('No se pudieron cargar las zonas');
+      // Datos de respaldo
+      setOpcionesZonas([
+        { label: "San Salvador", value: "1" },
+        { label: "Santa Tecla", value: "2" },
       ]);
-    }
-  };
-
-  const cargarCanchas = async (lugarId) => {
-    try {
-      console.log(`📡 GET /api/lugares/${lugarId}/canchas`);
-      setCargando(true);
-      const response = await api.get(`/api/lugares/${lugarId}/canchas`);
-      console.log("✅ Canchas:", response.data);
-      
-const canchasFormateadas = response.data.map(cancha => ({
-  label: cancha.nombre,
-  value: cancha.id
-}));
-      setOpcionesCanchas(canchasFormateadas);
-    } catch (err) {
-      console.error('❌ Error canchas:', err);
-      setOpcionesCanchas([]);
     } finally {
       setCargando(false);
     }
   };
+
+const cargarLugares = async (zonaId) => {
+  try {
+    console.log(`📡 GET /api/zonas/${zonaId}/lugares`);
+    setCargando(true);
+    const response = await api.get(`/api/zonas/${zonaId}/lugares`);
+    console.log("✅ Lugares:", response.data);
+    
+    const lugaresFormateados = response.data.map(lugar => ({
+      label: lugar.nombre,
+      value: lugar.id
+    }));
+    setOpcionesLugares(lugaresFormateados);
+  } catch (err) {
+    console.error('❌ Error lugares:', err);
+      // Datos de respaldo
+      setOpcionesLugares([
+        { label: "Complejo Deportivo A", value: "1" },
+        { label: "Complejo Deportivo B", value: "2" },
+      ]);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+const cargarTiposCanchas = async () => {
+  try {
+    console.log("📡 GET /api/canchas/tipos");
+    const response = await api.get('/api/canchas/tipos');
+    console.log("✅ Tipos de cancha:", response.data);
+    
+    const tiposFormateados = response.data.map(tipo => ({
+      label: tipo.nombre,  
+      value: tipo.id       
+    }));
+    
+    console.log("🔍 Tipos formateados:", tiposFormateados);
+    setOpcionesTipoCancha(tiposFormateados);
+  } catch (err) {
+    console.error('❌ Error tipos cancha:', err);
+    setOpcionesTipoCancha([
+      { label: "Fútbol 5", value: 1 },
+      { label: "Fútbol 7", value: 2 },
+    ]);
+  }
+};
+
+const cargarCanchas = async (lugarId) => {
+  try {
+    console.log(`📡 GET /api/lugares/${lugarId}/canchas`);
+    setCargando(true);
+    const response = await api.get(`/api/lugares/${lugarId}/canchas`);
+    console.log("✅ Canchas:", response.data);
+    
+    const canchasFormateadas = response.data.map(cancha => ({
+      label: cancha.nombre,
+      value: cancha.id
+    }));
+    
+    if (canchasFormateadas.length === 0) {
+      console.warn("⚠️ No hay canchas en la BD, usando datos de respaldo");
+      setOpcionesCanchas([
+        { label: "Cancha 1 - Sintética", value: 1 },
+        { label: "Cancha 2 - Césped Natural", value: 2 },
+      ]);
+    } else {
+      setOpcionesCanchas(canchasFormateadas);
+    }
+  } catch (err) {
+    console.error('❌ Error canchas:', err);
+    setOpcionesCanchas([
+      { label: "Cancha 1 - Sintética", value: 1 },
+      { label: "Cancha 2 - Césped Natural", value: 2 },
+    ]);
+  } finally {
+    setCargando(false);
+  }
+};
 
   const cargarFechasOcupadas = async (canchaId) => {
     try {
-      console.log(`📡 GET /api/reservas/fechas-ocupadas?canchaId=${canchaId}`);
       const response = await api.get(`/api/reservas/fechas-ocupadas?canchaId=${canchaId}`);
-      console.log("✅ Fechas ocupadas:", response.data);
       setFechasOcupadas(response.data);
     } catch (err) {
-      console.error('❌ Error fechas ocupadas:', err);
+      console.error('Error al cargar fechas ocupadas:', err);
       setFechasOcupadas([]);
     }
   };
 
   const cargarHorasOcupadas = async (canchaId, fecha) => {
     try {
-      console.log(`📡 GET /api/reservas/horas-ocupadas?canchaId=${canchaId}&fecha=${fecha}`);
       const response = await api.get(`/api/reservas/horas-ocupadas?canchaId=${canchaId}&fecha=${fecha}`);
-      console.log("✅ Horas ocupadas:", response.data);
       setHorasOcupadas(response.data);
     } catch (err) {
-      console.error('❌ Error horas ocupadas:', err);
+      console.error('Error al cargar horas ocupadas:', err);
       setHorasOcupadas([]);
     }
   };
 
   const cargarMetodosPago = async () => {
     try {
-      console.log("📡 GET /api/metodos-pago");
       const response = await api.get('/api/metodos-pago');
-      console.log("✅ Métodos de pago:", response.data);
-      
-const metodosFormateados = response.data.map(metodo => ({
-  label: metodo.nombre,
-  value: metodo.id
-}));
+      const metodosFormateados = response.data.map(metodo => ({
+        label: metodo.nombre,
+        value: metodo.id
+      }));
       setOpcionesMetodoPago(metodosFormateados);
     } catch (err) {
-      console.error('❌ Error métodos pago:', err);
+      console.error('Error al cargar métodos de pago:', err);
+      // Datos de respaldo
       setOpcionesMetodoPago([
-        { label: "Tarjeta de Crédito", value: 1 },
-        { label: "Tarjeta de Débito", value: 2 },
+        { label: "Tarjeta de Crédito", value: "1" },
+        { label: "Tarjeta de Débito", value: "2" },
       ]);
     }
   };
@@ -243,13 +261,18 @@ const metodosFormateados = response.data.map(metodo => ({
     );
   };
 
-  const calcularTotal = () => selectedHours.length * canchaInfo.precioPorHora;
+  const calcularTotal = () =>
+    selectedHours.length * canchaInfo.precioPorHora;
 
   const horaInicio = selectedHours[0] || null;
-  const horaFin =
-    selectedHours.length > 0
-      ? `${parseInt(selectedHours[selectedHours.length - 1]) + 1}:00`
-      : null;
+const horaFin = selectedHours.length > 0
+  ? (() => {
+      const ultimaHora = selectedHours[selectedHours.length - 1];
+      const [hours] = ultimaHora.split(':');
+      const nextHour = parseInt(hours) + 1;
+      return `${nextHour.toString().padStart(2, '0')}:00`;
+    })()
+  : null;
 
   // Validaciones de tarjeta
   const validarNumeroTarjeta = (num) => /^\d{16}$/.test(num);
@@ -261,62 +284,94 @@ const metodosFormateados = response.data.map(metodo => ({
       validarNumeroTarjeta(numeroTarjeta) &&
       validarVencimiento(vencimiento) &&
       validarCVV(cvv);
+
     setFormularioValido(esValido);
   }, [numeroTarjeta, vencimiento, cvv]);
 
-  const handlePagar = async () => {
-    if (formularioValido && selectedDate && selectedHours.length > 0) {
-      try {
-        setCargando(true);
-        console.log("💳 Procesando pago...");
-        
-        const reservaData = {
-          canchaId: canchaSeleccionada,
-          fecha: selectedDate.toISOString().split("T")[0],
-          horaInicio: horaInicio,
-          horaFin: horaFin,
-          metodoPagoId: metodoPagoSeleccionado,
-          total: calcularTotal(),
-        };
+const handlePagar = async () => {
+  if (formularioValido && selectedDate && selectedHours.length > 0) {
+    try {
+      setCargando(true);
+      console.log("💳 Procesando pago...");
+      
+      // ✅ AGREGAR ESTOS LOGS PARA DEBUG
+      console.log("🔍 Estados actuales:");
+      console.log("  - lugarSeleccionado:", lugarSeleccionado);
+      console.log("  - canchaSeleccionada:", canchaSeleccionada);
+      console.log("  - metodoPagoSeleccionado:", metodoPagoSeleccionado);
+      console.log("  - zonaSeleccionada:", zonaSeleccionada);
+      
+      // Formatear horas correctamente (HH:mm)
+      const formatearHora = (hora) => {
+        const [hours, minutes] = hora.split(':');
+        return `${hours.padStart(2, '0')}:${minutes || '00'}`;
+      };
 
-        console.log("📤 POST /api/reservas:", reservaData);
-        const response = await api.post('/api/reservas', reservaData);
-        
-        console.log('✅ Reserva creada:', response.data);
-        setPagoExitoso(true);
+      const reservaData = {
+        usuarioId: 1,
+        lugarId: parseInt(lugarSeleccionado),
+        canchaId: parseInt(canchaSeleccionada),
+        metodoPagoId: parseInt(metodoPagoSeleccionado),
+        fechaReserva: selectedDate.toISOString().split("T")[0],
+        horaEntrada: formatearHora(horaInicio),
+        horaSalida: formatearHora(horaFin),
+      };
 
-        // Limpiar
-        setNumeroTarjeta("");
-        setVencimiento("");
-        setCvv("");
-        setSelectedDate(null);
-        setSelectedHours([]);
-        setZonaSeleccionada("");
-        setLugarSeleccionado("");
-        setTipoCanchaSeleccionado("");
-        setCanchaSeleccionada("");
-        setMetodoPagoSeleccionado("");
-
-        setTimeout(() => setPagoExitoso(false), 5000);
-      } catch (err) {
-        console.error('❌ Error pago:', err);
-        setError('No se pudo procesar el pago.');
-        setTimeout(() => setError(null), 5000);
-      } finally {
-        setCargando(false);
+      console.log("📤 Datos a enviar:", reservaData);
+      
+      // Si lugarSeleccionado es undefined/null, detener aquí
+      if (!lugarSeleccionado) {
+        console.error("❌ ERROR: lugarSeleccionado está vacío");
+        setError("Debes seleccionar un lugar");
+        return;
       }
+
+      const response = await api.post('/api/reservas', reservaData);
+      
+      console.log('✅ Reserva creada:', response.data);
+      setPagoExitoso(true);
+
+      // Limpiar campos
+      setNumeroTarjeta("");
+      setVencimiento("");
+      setCvv("");
+      setSelectedDate(null);
+      setSelectedHours([]);
+      setZonaSeleccionada("");
+      setLugarSeleccionado("");
+      setTipoCanchaSeleccionado("");
+      setCanchaSeleccionada("");
+      setMetodoPagoSeleccionado("");
+
+      setTimeout(() => setPagoExitoso(false), 5000);
+    } catch (err) {
+      console.error('❌ Error pago:', err);
+      console.error('Detalles:', err.response?.data);
+      
+      // Mostrar error más detallado
+      const errorMsg = err.response?.data?.message || 
+                       err.response?.data?.error || 
+                       'No se pudo procesar el pago. Intenta nuevamente.';
+      setError(errorMsg);
+      
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setCargando(false);
     }
-  };
+  }
+};
 
   return (
     <div className="min-h-screen bg-[var(--canchitas-bg)] px-4 py-10 md:px-8 lg:px-16">
       <div className="max-w-6xl mx-auto space-y-8">
+        {/* Mensaje de error global */}
         {error && (
           <div className="bg-red-50 border border-red-300 rounded-xl px-4 py-3 text-sm text-red-900">
             {error}
           </div>
         )}
 
+        {/* Intro / pasos */}
         <section className="canchitas-section space-y-4">
           <h1 className="text-2xl md:text-3xl font-bold text-center text-[var(--canchitas-primary)]">
             Crear reservación
@@ -324,10 +379,38 @@ const metodosFormateados = response.data.map(metodo => ({
           <p className="text-sm text-[var(--canchitas-text-muted)] text-center">
             Sigue estos pasos para reservar tu cancha de forma rápida y segura.
           </p>
+
+          <ul className="mt-2 space-y-1 text-sm text-[var(--canchitas-text)]">
+            <li className="font-semibold">
+              Pasos para reservar tu cancha:
+            </li>
+            <li>
+              <span className="font-medium">1.</span> Selecciona tu zona o
+              ciudad y el lugar donde deseas alquilar una cancha.
+            </li>
+            <li>
+              <span className="font-medium">2.</span> Elige el tipo de cancha y
+              la cancha específica que mejor se adapte a tu equipo.
+            </li>
+            <li>
+              <span className="font-medium">3.</span> Selecciona la fecha y el
+              horario disponible que prefieras.
+            </li>
+            <li>
+              <span className="font-medium">4.</span> Ingresa tu método de pago
+              y confirma la reservación.
+            </li>
+            <li className="font-semibold">
+              ¡Listo! Solo te queda llegar a jugar.
+            </li>
+          </ul>
         </section>
 
+        {/* Layout principal */}
         <section className="grid lg:grid-cols-[2fr,1.5fr] gap-6 items-start">
+          {/* Columna izquierda */}
           <div className="space-y-6">
+            {/* Selección de cancha */}
             <div className="canchitas-section space-y-4">
               <h2 className="text-lg font-semibold text-[var(--canchitas-primary)]">
                 1. Elige tu cancha
@@ -375,12 +458,14 @@ const metodosFormateados = response.data.map(metodo => ({
               </div>
             </div>
 
+            {/* Calendario y horarios */}
             <div className="canchitas-section space-y-4">
               <h2 className="text-lg font-semibold text-[var(--canchitas-primary)]">
                 2. Elige fecha y horario
               </h2>
 
               <div className="grid md:grid-cols-2 gap-4">
+                {/* Calendario */}
                 <div>
                   <p className="text-sm font-medium text-[var(--canchitas-primary)] mb-2">
                     Calendario de reservas
@@ -400,6 +485,7 @@ const metodosFormateados = response.data.map(metodo => ({
                   )}
                 </div>
 
+                {/* Horarios */}
                 <div>
                   <p className="text-sm font-medium text-[var(--canchitas-primary)] mb-2">
                     Horarios disponibles
@@ -416,14 +502,17 @@ const metodosFormateados = response.data.map(metodo => ({
                       {selectedHours.length > 0 && (
                         <div className="mt-4 space-y-1 text-sm text-[var(--canchitas-text)]">
                           <p>
-                            Hora de inicio: <strong>{horaInicio}</strong>
+                            Hora de inicio:{" "}
+                            <strong>{horaInicio}</strong>
                           </p>
                           <p>
                             Hora de fin: <strong>{horaFin}</strong>
                           </p>
                           <p>
                             Total a pagar:{" "}
-                            <strong>${calcularTotal().toFixed(2)}</strong>
+                            <strong>
+                              ${calcularTotal().toFixed(2)}
+                            </strong>
                           </p>
                         </div>
                       )}
@@ -438,7 +527,9 @@ const metodosFormateados = response.data.map(metodo => ({
             </div>
           </div>
 
+          {/* Columna derecha */}
           <div className="space-y-6">
+            {/* Datos personales */}
             <div className="canchitas-section space-y-3">
               <h2 className="text-lg font-semibold text-[var(--canchitas-primary)]">
                 3. Datos personales
@@ -455,6 +546,7 @@ const metodosFormateados = response.data.map(metodo => ({
               </div>
             </div>
 
+            {/* Detalles de compra */}
             <div className="canchitas-section space-y-3">
               <h2 className="text-lg font-semibold text-[var(--canchitas-primary)]">
                 4. Detalles de la reserva
@@ -474,7 +566,9 @@ const metodosFormateados = response.data.map(metodo => ({
                 <div>
                   <p>
                     <strong>Fecha:</strong>{" "}
-                    {selectedDate ? selectedDate.toLocaleDateString() : "-"}
+                    {selectedDate
+                      ? selectedDate.toLocaleDateString()
+                      : "-"}
                   </p>
                   <p>
                     <strong>Entrada:</strong>{" "}
@@ -496,6 +590,7 @@ const metodosFormateados = response.data.map(metodo => ({
               </div>
             </div>
 
+            {/* Forma de pago */}
             <div className="canchitas-section space-y-4">
               <h2 className="text-lg font-semibold text-[var(--canchitas-primary)]">
                 5. Forma de pago
@@ -534,7 +629,9 @@ const metodosFormateados = response.data.map(metodo => ({
                   type="password"
                   value={cvv}
                   maxLength={3}
-                  onChange={(e) => setCvv(e.target.value.replace(/\D/g, ""))}
+                  onChange={(e) =>
+                    setCvv(e.target.value.replace(/\D/g, ""))
+                  }
                 />
               </div>
 
@@ -550,17 +647,12 @@ const metodosFormateados = response.data.map(metodo => ({
                   }
                   onClick={handlePagar}
                 >
-                  {cargando
-                    ? "Procesando..."
-                    : `Confirmar y pagar ${
-                        selectedHours.length > 0
-                          ? `- $${calcularTotal().toFixed(2)}`
-                          : ""
-                      }`}
+                  {cargando ? 'Procesando...' : `Confirmar y pagar ${selectedHours.length > 0 ? `- $${calcularTotal().toFixed(2)}` : ''}`}
                 </Button>
 
                 <p className="text-xs text-center text-[var(--canchitas-text-muted)]">
-                  Tu pago se procesa de forma segura.
+                  Tu pago se procesa de forma segura. No almacenamos los datos
+                  de tu tarjeta.
                 </p>
 
                 {pagoExitoso && (
