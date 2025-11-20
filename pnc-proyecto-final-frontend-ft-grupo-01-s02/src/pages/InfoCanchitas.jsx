@@ -3,7 +3,7 @@
 import { Link } from "react-router-dom";
 import CardCancha from "../components/CardCancha";
 
-import infochanchitas1 from "/src/assets/infocanchas1.png";
+import infochanchitas1 from "/src/assets/Infocanchas1.png";
 import infochanchitas2 from "/src/assets/Infocanchas2.png";
 import infochanchitas3 from "/src/assets/Infocanchas3.png";
 
