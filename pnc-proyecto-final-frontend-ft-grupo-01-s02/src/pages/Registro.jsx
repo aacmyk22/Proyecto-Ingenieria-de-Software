@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../config/api";
 
 import Input from "../components/Input";
 import Button from "../components/Button";
@@ -46,34 +47,22 @@ function Registro() {
     setErrores({});
 
     try {
-      const response = await fetch("http://localhost:8080/api/usuarios", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nombre,
-          apellido,
-          correo,
-          contrasena,
-          rolId: 2, // cliente
-        }),
+      const response = await api.post("/api/usuarios", {
+        nombre,
+        apellido,
+        correo,
+        contrasena,
+        rolId: 2, // cliente
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Error al registrar:", errorData);
-        alert("Hubo un error al registrar. Verifica los datos.");
-        return;
-      }
-
-      const data = await response.json();
+      const data = response.data;
       console.log("Registro exitoso:", data);
       alert("Registro exitoso. Ahora puedes iniciar sesión.");
       navigate("/login");
     } catch (error) {
-      console.error("Error de red:", error);
-      alert("Error de red al intentar registrar.");
+      console.error("Error al registrar:", error);
+      const mensaje = error.response?.data?.mensaje || "Hubo un error al registrar. Verifica los datos.";
+      alert(mensaje);
     }
   };
 

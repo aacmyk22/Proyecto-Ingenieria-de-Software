@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CardUsuario from "../../components/CardUsuarios";
 import { useAuth } from "../../context/AuthProvider";
+import api from "../../config/api";
 
 function Usuarios() {
   const navigate = useNavigate();
@@ -16,18 +17,8 @@ function Usuarios() {
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/usuarios", {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error("Error al obtener los usuarios");
-        }
-
-        const data = await response.json();
+        const res = await api.get("/api/usuarios");
+        const data = res.data;
 
         // Solo clientes
         const soloClientes = data.filter((usuario) => usuario.rol === "CLIENTE");
@@ -61,28 +52,12 @@ function Usuarios() {
     if (!confirmar) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:8080/api/usuarios/${usuarioId}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert(data.mensaje);
-        setUsuarios((prev) => prev.filter((u) => u.idUsuario !== usuarioId));
-      } else {
-        alert("No se pudo eliminar el usuario.");
-        console.error(data);
-      }
+      const res = await api.delete(`/api/usuarios/${usuarioId}`);
+      alert(res.data.mensaje);
+      setUsuarios((prev) => prev.filter((u) => u.idUsuario !== usuarioId));
     } catch (error) {
+      alert(error.response?.data?.mensaje || "Ocurrió un error al eliminar el usuario.");
       console.error("Error al eliminar usuario:", error);
-      alert("Ocurrió un error al eliminar el usuario.");
     }
   };
 

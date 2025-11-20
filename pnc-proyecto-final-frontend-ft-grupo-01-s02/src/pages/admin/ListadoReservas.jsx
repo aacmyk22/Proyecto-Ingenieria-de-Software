@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthProvider";
+import api from "../../config/api";
 
 function ListadoReservas() {
   const { token } = useAuth();
@@ -14,14 +15,10 @@ function ListadoReservas() {
   useEffect(() => {
     if (!token) return;
 
-    fetch("http://localhost:8080/api/reservas", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
+    const fetchReservas = async () => {
+      try {
+        const res = await api.get("/api/reservas");
+        const data = res.data;
         console.log("Datos recibidos desde el backend:", data);
 
         setReservasPendientes(
@@ -34,8 +31,12 @@ function ListadoReservas() {
             return estado === "REALIZADA" || estado === "FINALIZADA";
           })
         );
-      })
-      .catch((err) => console.error("Error cargando reservas:", err));
+      } catch (err) {
+        console.error("Error cargando reservas:", err);
+      }
+    };
+
+    fetchReservas();
   }, [token]);
 
   const renderReservaCard = (r, variante) => {
