@@ -1,6 +1,7 @@
 // src/pages/usuario/MisReservaciones.jsx
 import { useState, useEffect } from 'react';
 import api from '../../config/api';
+import { Link } from "react-router-dom";
 
 function MisReservaciones() {
   const [reservas, setReservas] = useState([]);
@@ -177,12 +178,13 @@ function MisReservaciones() {
             <p className="text-lg text-[var(--canchitas-text)] mb-4">
               Aún no tienes reservaciones registradas.
             </p>
-            <a
-              href="/crear-reservacion"
-              className="inline-block px-6 py-3 bg-[var(--canchitas-accent)] text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
-            >
-              Crear mi primera reserva
-            </a>
+            <Link
+  to="/reservar"  
+  className="inline-block px-6 py-3 bg-[var(--canchitas-accent)] text-white rounded-xl font-medium hover:opacity-90 transition-opacity"
+>
+  Crear mi primera reserva
+</Link>
+
           </div>
         ) : (
           <div className="space-y-4">
