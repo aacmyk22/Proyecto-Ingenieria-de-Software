@@ -1,10 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthProvider';
 
-import navbar1 from '/src/assets/futbol-americano.png'
+import navbar1 from '/src/assets/futbol-americano-negro.png';
 
 function NavBar() {
-
   const { token, role, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -14,52 +13,73 @@ function NavBar() {
   };
 
   return (
-    <div className="navbar items-center justify-center bg-[#213A58] shadow-sm">
-      <div className="flex-1 items-center justify-center gap-2">
-        <div>
-          <Link to="/" className="flex grid-rows-1">
-            <p className="text-xl font-bold text-white">Canchitas</p>
-            <img
-              src={navbar1}
-              alt="Logo"
-              className="w-8 h-8"
-            />
-          </Link>
-        </div>
+    <div className="navbar items-center justify-between bg-[#FFF7ED] shadow-sm px-6">
+
+      {/* LOGO + NOMBRE */}
+      <div className="flex items-center gap-2 flex-1">
+        <Link to="/" className="flex items-center gap-2">
+          <img
+            src={navbar1}
+            alt="Logo"
+            className="w-8 h-8"
+          />
+          <p className="text-2xl font-bold text-black">
+            Sport<span className="text-[#FF9900]">Match</span>
+          </p>
+        </Link>
       </div>
 
-      <div className="flex items-center justify-center">
-        <div className="flex-none">
-          <ul className="menu menu-horizontal px-1 text-white">
-            <li><Link to="/">Inicio</Link></li>
+      {/* NAV LINKS */}
+      <div className="hidden md:flex items-center justify-center">
+        <ul className="menu menu-horizontal px-1 text-black font-medium">
 
-            {token && role === 'CLIENTE' && (
-              <>
-                <li><Link to="/info_canchas">Canchas</Link></li>
-                <li><Link to="/reservar">Crear reservación</Link></li>
-                <li><Link to="/mis_reservaciones">Mis reservaciones</Link></li>
-              </>
-            )}
+          <li><Link className="hover:text-[#FF9900]" to="/">Inicio</Link></li>
 
-            {token && role === 'ADMIN' && (
-              <>
-                <li><Link to="/reservaciones">Reservaciones</Link></li>
-                <li><Link to="/usuarios">Usuarios</Link></li>
-                <li><Link to="/lugares">Lugares</Link></li>
-              </>
-            )}
-          </ul>
-        </div>
+          {token && role === 'CLIENTE' && (
+            <>
+              <li><Link className="hover:text-[#FF9900]" to="/info_canchas">Canchas</Link></li>
+              <li><Link className="hover:text-[#FF9900]" to="/reservar">Crear reservación</Link></li>
+              <li><Link className="hover:text-[#FF9900]" to="/mis_reservaciones">Mis reservaciones</Link></li>
+            </>
+          )}
 
-        {token && (
+          {token && role === 'ADMIN' && (
+            <>
+              <li><Link className="hover:text-[#FF9900]" to="/reservaciones">Reservaciones</Link></li>
+              <li><Link className="hover:text-[#FF9900]" to="/usuarios">Usuarios</Link></li>
+              <li><Link className="hover:text-[#FF9900]" to="/lugares">Lugares</Link></li>
+            </>
+          )}
+        </ul>
+      </div>
+
+      {/* ICONO DE USUARIO / LOGIN */}
+      <div className="flex items-center">
+
+        {!token ? (
+          <Link to="/login">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="black"
+              viewBox="0 0 24 24"
+              className="w-9 h-9 hover:text-[#FF9900] transition"
+            >
+              <path
+                fillRule="evenodd"
+                d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25Zm0 4.5a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm-.047 12c2.568 0 4.78-1.517 5.683-3.708-.845-1.499-2.478-2.517-4.266-2.517h-2.88c-1.788 0-3.421 1.018-4.266 2.517C7.174 17.233 9.385 18.75 11.953 18.75Z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </Link>
+        ) : (
           <div className="dropdown dropdown-end">
             <div tabIndex={0} role="button" className="btn-circle">
               <div className="w-10 rounded-full">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
+                  fill="black"
                   viewBox="0 0 24 24"
-                  fill="white"
-                  className="size-10"
+                  className="size-10 hover:text-[#FF9900] transition"
                 >
                   <path
                     fillRule="evenodd"
@@ -69,18 +89,23 @@ function NavBar() {
                 </svg>
               </div>
             </div>
+
             <ul
               tabIndex={0}
-              className="menu menu-sm dropdown-content bg-[#213A58] rounded-box z-1 mt-3 w-52 p-2 shadow"
+              className="menu menu-sm dropdown-content bg-[#FFF7ED] border border-[#FF9900] rounded-box mt-3 w-52 p-2 shadow"
             >
               <li>
-                <button className="btn btn-ghost text-white" onClick={handleLogout}>
+                <button
+                  className="btn btn-ghost text-black hover:text-[#FF9900]"
+                  onClick={handleLogout}
+                >
                   Cerrar sesión
                 </button>
               </li>
             </ul>
           </div>
         )}
+
       </div>
     </div>
   );
