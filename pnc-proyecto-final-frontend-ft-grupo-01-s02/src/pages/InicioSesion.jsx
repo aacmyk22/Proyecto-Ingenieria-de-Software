@@ -43,26 +43,37 @@ function InicioSesion() {
     setErrores({});
 
     try {
-      const response = await api.post("/api/auth/login", { correo, contrasena });
-      const data = response.data;
+      const response = await api.post("/api/auth/login", {
+        correo,
+        contrasena,
+      });
 
+      const data = response.data;
       console.log("Respuesta del backend:", data);
 
-      if (!data.token || !data.role) {
-        alert("Respuesta inválida del servidor");
+      const { token, role, usuario } = data;
+
+      if (!token || !role) {
+        alert("Respuesta inválida del servidor (falta token o rol)");
         return;
       }
 
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
+      if (!usuario || (!usuario.idUsuario && !usuario.id && !usuario.userId)) {
+        console.warn("⚠️ Respuesta sin usuario o sin id de usuario:", usuario);
+        alert("Respuesta inválida del servidor (falta información del usuario)");
+        return;
+      }
 
-      login(data.token, data.role);
-      console.log("Login exitoso:", data.token, data.role);
+      // ✅ Delega en el AuthProvider que guarde token, rol y user en localStorage/estado
+      login(token, role, usuario);
+      console.log("Login exitoso:", token, role, usuario);
 
+      // Redirigir al inicio
       navigate("/", { replace: true });
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
-      const mensaje = error.response?.data?.mensaje || "Error al iniciar sesión";
+      const mensaje =
+        error.response?.data?.mensaje || "Error al iniciar sesión";
       alert(mensaje);
     }
   };
@@ -147,7 +158,7 @@ function InicioSesion() {
               value={contrasena}
               onChange={(e) => setContrasena(e.target.value)}
               error={errores.contrasena}
-              suffix={(
+              suffix={
                 <button
                   type="button"
                   onClick={() => setMostrarContrasena(!mostrarContrasena)}
@@ -190,16 +201,12 @@ function InicioSesion() {
                     </svg>
                   )}
                 </button>
-              )}
+              }
             />
 
             {/* Botón y enlaces */}
             <div className="mt-6 flex flex-col items-center gap-3">
-              <Button
-                variant="primary"
-                fullWidth
-                onClick={handleInicioSesion}
-              >
+              <Button variant="primary" fullWidth onClick={handleInicioSesion}>
                 Iniciar sesión
               </Button>
 
