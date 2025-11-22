@@ -13,7 +13,7 @@ function SelectorHoras({ horasOcupadas, horasSeleccionadas, onHoraClick }) {
         return (
           <button
             key={hora}
-            className={`btn btn-sm hover:bg-gray-400 border-white text-white ${
+            className={`btn btn-sm hover:bg-gray-400 border-black text-black ${
               esHoraOcupada(hora)
                 ? "btn-disabled"
                 : seleccionada

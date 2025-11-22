@@ -10,7 +10,7 @@ function Footer() {
                 <div className="flex-1 items-center justify-center gap-2">
                     <div >
                         <Link to="/" className="flex grid-rows-1">
-                            <p className="text-xl font-bold text-white">Canchitas</p>
+                            <p className="text-xl font-bold text-white">SportMatch</p>
                             <img
                                 src={footer1}
                                 alt="Logo"
@@ -60,7 +60,7 @@ function Footer() {
             </nav>
             <nav>
                 <h6 className="footer-title">Contacto</h6>
-                <p className="link link-hover">canchitas@fut.com</p>
+                <p className="link link-hover">SportMatch@fut.com</p>
             </nav>
             <nav className="flex grid-rows-2 justify-center items-center">
                 <h6 className="footer-title">Sitio seguro</h6>

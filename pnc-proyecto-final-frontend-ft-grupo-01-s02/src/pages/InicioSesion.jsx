@@ -123,7 +123,7 @@ function InicioSesion() {
               className="flex items-center justify-center gap-2 mb-4"
             >
               <h1 className="text-xl font-bold text-[var(--canchitas-primary)]">
-                Canchitas
+                Sport<span className="text-[#FF9900]">Match</span>
               </h1>
               <img src={iniciosesion2} alt="Logo" className="w-8 h-8" />
             </Link>
