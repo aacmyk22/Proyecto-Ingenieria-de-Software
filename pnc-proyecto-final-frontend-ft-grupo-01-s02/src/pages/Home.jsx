@@ -12,17 +12,18 @@ import { useAuth } from "../context/AuthProvider";
 
 function Home() {
   const navigate = useNavigate();
-  const { token } = useAuth();
+  const { token, role } = useAuth();
   const isLoggedIn = Boolean(token);
+
+  const isCliente = token && role === "CLIENTE";
+  const isAdmin = token && role === "ADMIN";
 
   return (
     <main className="w-full">
-
       {/* ========================================================= */}
       {/* HERO PRINCIPAL                                            */}
       {/* ========================================================= */}
       <section className="relative h-[550px] w-full">
-
         <img
           src={home4}
           alt="Fondo SportMatch"
@@ -35,7 +36,8 @@ function Home() {
           </h1>
 
           <div className="flex gap-4 flex-wrap justify-center">
-            {!isLoggedIn ? (
+            {/* 🔸 Usuario NO autenticado */}
+            {!isLoggedIn && (
               <>
                 <Button
                   variant="primary"
@@ -53,7 +55,10 @@ function Home() {
                   Registrarse
                 </Button>
               </>
-            ) : (
+            )}
+
+            {/* 🔸 Usuario CLIENTE */}
+            {isCliente && (
               <>
                 <Button
                   variant="primary"
@@ -72,6 +77,20 @@ function Home() {
                 </Button>
               </>
             )}
+
+            {/* 🔸 Usuario ADMIN */}
+            {isAdmin && (
+              <Button
+                variant="primary"
+                className="bg-[#FF9900] hover:bg-[#FFBF00] text-white px-6 py-3 rounded-lg font-semibold"
+                // 👇 Usa la misma ruta que en el NavBar para las reservas de admin
+                onClick={() => navigate("/reservaciones")}
+                // Si tu Route real es algo tipo "/admin/reservas",
+                // solo cambia la ruta de arriba.
+              >
+                Ver reservaciones
+              </Button>
+            )}
           </div>
         </div>
       </section>
@@ -80,7 +99,6 @@ function Home() {
       {/* SECTION — CARDS PRINCIPALES                              */}
       {/* ========================================================= */}
       <section className="py-16 px-6 md:px-20 grid md:grid-cols-2 gap-10 bg-[#fff]">
-        
         {/* Card 1 */}
         <div className="bg-[#FFF0E0] shadow-lg rounded-xl overflow-hidden">
           <img
@@ -92,8 +110,8 @@ function Home() {
               Inicia tu temporada de deporte
             </h2>
             <p className="text-gray-700">
-              Organiza tus partidos, evita choques de horarios y mantén a tu equipo
-              siempre listo para el próximo encuentro.
+              Organiza tus partidos, evita choques de horarios y mantén a tu
+              equipo siempre listo para el próximo encuentro.
             </p>
           </div>
         </div>
@@ -149,10 +167,10 @@ function Home() {
         </h2>
 
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-
           <div className="bg-white p-6 rounded-xl shadow-lg">
             <p className="text-gray-700 italic">
-              “Me encanta poder reservar canchas con facilidad. Todo es súper rápido y sin complicaciones.”
+              “Me encanta poder reservar canchas con facilidad. Todo es súper
+              rápido y sin complicaciones.”
             </p>
             <span className="block mt-4 font-semibold text-[#FF9900]">
               - Juan Pérez
@@ -161,7 +179,8 @@ function Home() {
 
           <div className="bg-white p-6 rounded-xl shadow-lg">
             <p className="text-gray-700 italic">
-              “SportMatch hace que organizar los partidos sea mucho más simple.”
+              “SportMatch hace que organizar los partidos sea mucho más
+              simple.”
             </p>
             <span className="block mt-4 font-semibold text-[#FF9900]">
               - Henry López
@@ -170,16 +189,15 @@ function Home() {
 
           <div className="bg-white p-6 rounded-xl shadow-lg">
             <p className="text-gray-700 italic">
-              “La calidad de las canchas es excelente y el servicio siempre ha sido rápido.”
+              “La calidad de las canchas es excelente y el servicio siempre ha
+              sido rápido.”
             </p>
             <span className="block mt-4 font-semibold text-[#FF9900]">
               - Camila García
             </span>
           </div>
-
         </div>
       </section>
-
     </main>
   );
 }

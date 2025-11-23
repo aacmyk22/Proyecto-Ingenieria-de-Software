@@ -43,15 +43,15 @@ function Reservacion() {
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
 
-  // Información de la cancha (temporal - debería venir de la API)
-  const [canchaInfo, setCanchaInfo] = useState({
+  // Información de la cancha (solo usamos precioPorHora por ahora)
+  const [canchaInfo] = useState({
     nombre: "Cancha Fútbol 5",
     lugar: "Complejo Deportivo A",
     zona: "San Salvador",
     precioPorHora: 10.0,
   });
 
-  // ✅ Usuario desde AuthProvider / localStorage (en vez de hardcodeado)
+  // ✅ Usuario desde AuthProvider / localStorage
   const { user: userFromContext } = useAuth();
 
   const usuario =
@@ -388,6 +388,16 @@ function Reservacion() {
     }
   };
 
+  // ===============================
+  // 🔎 Labels dinámicos para detalles
+  // ===============================
+  const getLabelFromOptions = (options, value) =>
+    options.find((opt) => String(opt.value) === String(value))?.label || "-";
+
+  const zonaLabel = getLabelFromOptions(opcionesZonas, zonaSeleccionada);
+  const lugarLabel = getLabelFromOptions(opcionesLugares, lugarSeleccionado);
+  const canchaLabel = getLabelFromOptions(opcionesCanchas, canchaSeleccionada);
+
   return (
     <div className="min-h-screen bg-[var(--canchitas-bg)] px-4 py-10 md:px-8 lg:px-16">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -579,13 +589,13 @@ function Reservacion() {
               <div className="grid sm:grid-cols-2 gap-3 text-sm text-[var(--canchitas-text)]">
                 <div>
                   <p>
-                    <strong>Lugar:</strong> {canchaInfo.lugar}
+                    <strong>Lugar:</strong> {lugarLabel}
                   </p>
                   <p>
-                    <strong>Zona:</strong> {canchaInfo.zona}
+                    <strong>Zona:</strong> {zonaLabel}
                   </p>
                   <p>
-                    <strong>Cancha:</strong> {canchaInfo.nombre}
+                    <strong>Cancha:</strong> {canchaLabel}
                   </p>
                 </div>
                 <div>
