@@ -51,7 +51,7 @@ function Reservacion() {
     precioPorHora: 10.0,
   });
 
-  // ✅ Usuario desde AuthProvider / localStorage
+  // Usuario desde AuthProvider / localStorage
   const { user: userFromContext } = useAuth();
 
   const usuario =
@@ -69,7 +69,7 @@ function Reservacion() {
       correo: "-",
     };
 
-  // ✅ CARGAR ZONAS al montar el componente
+  // CARGAR ZONAS al montar el componente
   useEffect(() => {
     console.log("🚀 Componente montado");
     cargarZonas();
@@ -77,7 +77,7 @@ function Reservacion() {
     cargarMetodosPago();
   }, []);
 
-  // ✅ CARGAR CANCHAS cuando cambia el lugar
+  // CARGAR CANCHAS cuando cambia el lugar
   useEffect(() => {
     if (lugarSeleccionado) {
       console.log("🏢 Lugar seleccionado:", lugarSeleccionado);
@@ -88,7 +88,7 @@ function Reservacion() {
     }
   }, [lugarSeleccionado]);
 
-  // ✅ CARGAR LUGARES cuando cambia la zona
+  // CARGAR LUGARES cuando cambia la zona
   useEffect(() => {
     if (zonaSeleccionada) {
       cargarLugares(zonaSeleccionada);
@@ -98,7 +98,7 @@ function Reservacion() {
     }
   }, [zonaSeleccionada]);
 
-  // ✅ CARGAR CANCHAS cuando cambia el tipo de cancha
+  // CARGAR CANCHAS cuando cambia el tipo de cancha
   useEffect(() => {
     if (tipoCanchaSeleccionado) {
       cargarCanchas(lugarSeleccionado);
@@ -108,14 +108,14 @@ function Reservacion() {
     }
   }, [tipoCanchaSeleccionado]);
 
-  // ✅ CARGAR FECHAS OCUPADAS cuando cambia la cancha
+  // CARGAR FECHAS OCUPADAS cuando cambia la cancha
   useEffect(() => {
     if (canchaSeleccionada) {
       cargarFechasOcupadas(canchaSeleccionada);
     }
   }, [canchaSeleccionada]);
 
-  // ✅ CARGAR HORARIOS OCUPADOS cuando cambia la fecha
+  // CARGAR HORARIOS OCUPADOS cuando cambia la fecha
   useEffect(() => {
     if (selectedDate && canchaSeleccionada) {
       const fechaStr = selectedDate.toISOString().split("T")[0];
@@ -124,7 +124,7 @@ function Reservacion() {
     }
   }, [selectedDate, canchaSeleccionada]);
 
-  // 🔌 FUNCIONES PARA LLAMAR A LA API
+  // FUNCIONES PARA LLAMAR A LA API
 
   const cargarZonas = async () => {
     try {
