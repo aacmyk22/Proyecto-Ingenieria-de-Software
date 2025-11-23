@@ -187,13 +187,22 @@ function NavBar() {
         </div>
       </div>
 
+      {/* Overlay para cerrar menú al tocar fuera - debe estar antes del menú */}
+      {menuAbierto && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/20 z-40"
+          onClick={() => setMenuAbierto(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* MENÚ MÓVIL DESPLEGABLE */}
       <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          menuAbierto ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        className={`md:hidden absolute left-0 right-0 top-full z-50 overflow-hidden transition-all duration-300 ease-in-out ${
+          menuAbierto ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0 pointer-events-none'
         }`}
       >
-        <div className="bg-[#FFF7ED] border-t border-[#FF9900]/20 px-4 py-3">
+        <div className="bg-[#FFF7ED] border-t border-[#FF9900]/20 px-4 py-3 shadow-lg">
           <ul className="flex flex-col gap-1">
             {navLinks.map((link) => (
               <li key={link.to}>
@@ -225,15 +234,6 @@ function NavBar() {
           </ul>
         </div>
       </div>
-
-      {/* Overlay para cerrar menú al tocar fuera */}
-      {menuAbierto && (
-        <div
-          className="md:hidden fixed inset-0 top-[60px] bg-black/20 z-40"
-          onClick={() => setMenuAbierto(false)}
-          aria-hidden="true"
-        />
-      )}
     </nav>
   );
 }
