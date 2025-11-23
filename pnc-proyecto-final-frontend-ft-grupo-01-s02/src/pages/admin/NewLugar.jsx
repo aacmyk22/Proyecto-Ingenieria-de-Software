@@ -1,4 +1,4 @@
-// src/pages/admin/NewLugar.jsx (ajusta la ruta si la tienes en otra carpeta)
+// src/pages/admin/NewLugar.jsx
 
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -22,7 +22,7 @@ export default function NewLugar() {
   const nameRef = useRef(null);
   const zonaRef = useRef(null);
 
-  // Cargar zonas disponibles
+  // 🔹 Cargar zonas disponibles
   useEffect(() => {
     const fetchZonas = async () => {
       try {
@@ -35,7 +35,35 @@ export default function NewLugar() {
     if (token) fetchZonas();
   }, [token]);
 
-  // Ocultar mensaje de éxito
+  // 🔹 Calcular código base = total de lugares + 1
+  useEffect(() => {
+    const fetchCodigoBase = async () => {
+      try {
+        const res = await api.get("/api/lugares");
+        let total = 0;
+
+        // Intentos defensivos según cómo venga la respuesta
+        if (Array.isArray(res.data)) {
+          total = res.data.length;
+        } else if (Array.isArray(res.data?.data)) {
+          total = res.data.data.length;
+        } else if (typeof res.data?.totalElements === "number") {
+          total = res.data.totalElements;
+        }
+
+        const codigoBase = total + 1;
+
+        // Solo autocompletar si el usuario aún no escribió nada
+        setCodigo((prev) => (prev ? prev : String(codigoBase)));
+      } catch (error) {
+        console.error("Error al calcular código base del lugar:", error);
+      }
+    };
+
+    if (token) fetchCodigoBase();
+  }, [token]);
+
+  // 🔹 Ocultar mensaje de éxito
   useEffect(() => {
     if (success) {
       const timer = setTimeout(() => setSuccess(false), 2000);
@@ -43,7 +71,7 @@ export default function NewLugar() {
     }
   }, [success]);
 
-  // Cerrar dropdown al hacer clic fuera
+  // 🔹 Cerrar dropdown al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (zonaRef.current && !zonaRef.current.contains(e.target)) {
@@ -65,7 +93,7 @@ export default function NewLugar() {
     const nuevoLugar = {
       nombre,
       direccion,
-      codigo: parseInt(codigo),
+      codigo: parseInt(codigo, 10),
       zona: zona.id,
     };
 
@@ -76,7 +104,10 @@ export default function NewLugar() {
         navigate("/lugares");
       }, 1000);
     } catch (error) {
-      console.error("Error al crear el lugar:", error.response?.data?.mensaje || error.message);
+      console.error(
+        "Error al crear el lugar:",
+        error.response?.data?.mensaje || error.message
+      );
     }
   };
 
@@ -147,8 +178,9 @@ export default function NewLugar() {
             />
           </div>
 
-          {/* Código */}
+          {/* Código + Zona */}
           <div className="grid gap-4 md:grid-cols-[minmax(0,0.6fr)_minmax(0,1.4fr)] items-center">
+            {/* Código */}
             <div>
               <label className="block text-sm font-semibold text-[var(--canchitas-primary)] mb-1">
                 Código del establecimiento *
@@ -161,6 +193,7 @@ export default function NewLugar() {
                 placeholder="Código interno"
                 className="w-full rounded-xl border border-black/40 bg-transparent px-3 py-2 text-[var(--canchitas-primary)] text-sm focus:outline-none focus:ring-2 focus:ring-[var(--canchitas-primary-soft)]"
               />
+              
             </div>
 
             {/* Zona */}
@@ -172,7 +205,13 @@ export default function NewLugar() {
                 onClick={toggleDropdown}
                 className="w-full rounded-xl border border-black/40 bg-white px-3 py-2 text-sm flex justify-between items-center cursor-pointer"
               >
-                <span className={zona ? "text-[var(--canchitas-primary)]" : "text-gray-400"}>
+                <span
+                  className={
+                    zona
+                      ? "text-[var(--canchitas-primary)]"
+                      : "text-gray-400"
+                  }
+                >
                   {zona ? zona.nombre : "Seleccione una zona"}
                 </span>
                 <svg
@@ -184,7 +223,12 @@ export default function NewLugar() {
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
                 </svg>
               </div>
               {isOpen && (
