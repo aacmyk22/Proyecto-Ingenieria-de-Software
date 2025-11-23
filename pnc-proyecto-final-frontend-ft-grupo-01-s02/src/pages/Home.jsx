@@ -1,28 +1,34 @@
 // src/pages/Home.jsx
 
+// Imports
 import { useNavigate } from "react-router-dom";
 
+// Image assets
 import home1 from "../assets/Canchitas-home2.png";
 import home2 from "../assets/Cachitas-home1.png";
 import home3 from "../assets/Canchitas-home3.png";
 import home4 from "../assets/home4.png";
 
+// Components and context
 import Button from "../components/Button";
 import { useAuth } from "../context/AuthProvider";
 
 function Home() {
+  // Router navigation
   const navigate = useNavigate();
+
+  // Auth context (token + role)
   const { token, role } = useAuth();
+  // Derived auth states
   const isLoggedIn = Boolean(token);
 
   const isCliente = token && role === "CLIENTE";
   const isAdmin = token && role === "ADMIN";
 
+  // Render
   return (
     <main className="w-full">
-      {/* ========================================================= */}
-      {/* HERO PRINCIPAL                                            */}
-      {/* ========================================================= */}
+      {/* Hero section */}
       <section className="relative h-[550px] w-full">
         <img
           src={home4}
@@ -36,7 +42,7 @@ function Home() {
           </h1>
 
           <div className="flex gap-4 flex-wrap justify-center">
-            {/* 🔸 Usuario NO autenticado */}
+            {/* Usuario NO autenticado */}
             {!isLoggedIn && (
               <>
                 <Button
@@ -57,7 +63,7 @@ function Home() {
               </>
             )}
 
-            {/* 🔸 Usuario CLIENTE */}
+            {/* Usuario CLIENTE */}
             {isCliente && (
               <>
                 <Button
@@ -78,15 +84,14 @@ function Home() {
               </>
             )}
 
-            {/* 🔸 Usuario ADMIN */}
+            {/* Usuario ADMIN */}
             {isAdmin && (
               <Button
                 variant="primary"
                 className="bg-[#FF9900] hover:bg-[#FFBF00] text-white px-6 py-3 rounded-lg font-semibold"
-                // 👇 Usa la misma ruta que en el NavBar para las reservas de admin
+                
                 onClick={() => navigate("/reservaciones")}
-                // Si tu Route real es algo tipo "/admin/reservas",
-                // solo cambia la ruta de arriba.
+               
               >
                 Ver reservaciones
               </Button>
@@ -96,10 +101,10 @@ function Home() {
       </section>
 
       {/* ========================================================= */}
-      {/* SECTION — CARDS PRINCIPALES                              */}
+      {/* Cards section */}
       {/* ========================================================= */}
       <section className="py-16 px-6 md:px-20 grid md:grid-cols-2 gap-10 bg-[#fff]">
-        {/* Card 1 */}
+        
         <div className="bg-[#FFF0E0] shadow-lg rounded-xl overflow-hidden">
           <img
             src={home1}
@@ -116,7 +121,7 @@ function Home() {
           </div>
         </div>
 
-        {/* Card 2 */}
+      
         <div className="bg-[#FFF0E0] shadow-lg rounded-xl overflow-hidden">
           <img
             src={home3}
@@ -134,9 +139,8 @@ function Home() {
         </div>
       </section>
 
-      {/* ========================================================= */}
-      {/* NUESTRAS CANCHAS                                          */}
-      {/* ========================================================= */}
+     
+      {/* Gallery section */}
       <section className="bg-[#FFF0E0] py-16 px-6 text-center">
         <h2 className="text-2xl md:text-3xl font-bold mb-10 text-black">
           Nuestras Canchas
@@ -158,9 +162,8 @@ function Home() {
         </div>
       </section>
 
-      {/* ========================================================= */}
-      {/* TESTIMONIOS                                              */}
-      {/* ========================================================= */}
+      
+      {/* Testimonials section */}
       <section className="py-16 px-6 text-center bg-[#FFFF]">
         <h2 className="text-2xl md:text-3xl font-bold mb-10 text-black">
           Lo que dicen nuestros jugadores
