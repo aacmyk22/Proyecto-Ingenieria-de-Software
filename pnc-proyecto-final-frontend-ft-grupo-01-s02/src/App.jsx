@@ -15,7 +15,7 @@ import InfoCanchitas from "./pages/InfoCanchitas";
 import Registro from "./pages/Registro";
 import InicioSesion from "./pages/InicioSesion";
 import MisReservaciones from "./pages/usuario/MisReservaciones";
-import Reservacion from "./pages/usuario/Reservacion";
+import FlujoReserva from "./pages/usuario/FlujoReserva";
 
 // Admin
 import AllReservaciones from "./pages/admin/AllReservaciones";
@@ -40,7 +40,7 @@ function App() {
           {/* Rutas protegidas para USUARIO */}
           <Route element={<RutaProtegida rolRequerido="CLIENTE" />}>
             <Route path="/info_canchas" element={<InfoCanchitas />} />
-            <Route path="/reservar" element={<Reservacion />} />
+            <Route path="/reservar" element={<FlujoReserva />} />
             <Route path="/mis_reservaciones" element={<MisReservaciones />} />
           </Route>
 
