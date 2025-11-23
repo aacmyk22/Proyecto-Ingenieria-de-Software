@@ -84,13 +84,13 @@ function InfoCanchitas() {
 
   return (
     <div className="bg-[#fae8d3] min-h-screen">
-      <main className="max-w-6xl mx-auto px-4 py-10 space-y-10">
+      <main className="max-w-6xl mx-auto px-4 py-6 md:py-10 space-y-8 md:space-y-10">
         {/* Hero / encabezado */}
         <section className="space-y-3">
-          <h1 className="text-3xl font-bold text-center text-[#0a0704]">
+          <h1 className="text-2xl md:text-3xl font-bold text-center text-[#0a0704]">
             Canchas en nuestra plataforma
           </h1>
-          <p className="text-sm md:text-base text-[#080603] text-center max-w-2xl mx-auto">
+          <p className="text-sm md:text-base text-[#080603] text-center max-w-2xl mx-auto px-2">
             Aquí puedes ver las canchas que forman parte de Canchitas. Esta
             sección es solo informativa: te ayuda a conocer los espacios
             disponibles antes de iniciar sesión y hacer tu reserva.
@@ -105,42 +105,44 @@ function InfoCanchitas() {
           </h2>
 
           {/* Filtros y búsqueda */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            {/* Botones de zona */}
-            <div className="flex flex-wrap justify-center md:justify-start gap-2">
-              <button
-                type="button"
-                className={`${baseFiltroBtn} ${
-                  esZonaActiva("TODAS") ? activoClasses : inactivoClasses
-                }`}
-                onClick={() => setZonaActiva("TODAS")}
-              >
-                Todas las zonas
-              </button>
-
-              {zonasUnicas.map((zona) => (
-                <button
-                  key={zona}
-                  type="button"
-                  className={`${baseFiltroBtn} ${
-                    esZonaActiva(zona) ? activoClasses : inactivoClasses
-                  }`}
-                  onClick={() => setZonaActiva(zona)}
-                >
-                  {zona}
-                </button>
-              ))}
-            </div>
-
-            {/* Buscador */}
-            <div className="w-full md:w-64">
+          <div className="flex flex-col gap-4">
+            {/* Buscador - primero en móvil para mejor UX */}
+            <div className="w-full md:w-64 md:order-2 md:ml-auto">
               <input
                 type="text"
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
                 placeholder="Buscar lugar..."
-                className="w-full rounded-full border border-slate-300 bg-white px-4 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FFCC80] focus:border-[#FF9900]"
+                className="w-full rounded-full border border-slate-300 bg-white px-4 py-3 md:py-2 text-base md:text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#FFCC80] focus:border-[#FF9900]"
               />
+            </div>
+
+            {/* Botones de zona - con scroll horizontal en móvil si hay muchas zonas */}
+            <div className="md:order-1 overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+              <div className="flex flex-nowrap md:flex-wrap justify-start md:justify-start gap-2 pb-2 md:pb-0">
+                <button
+                  type="button"
+                  className={`${baseFiltroBtn} whitespace-nowrap flex-shrink-0 ${
+                    esZonaActiva("TODAS") ? activoClasses : inactivoClasses
+                  }`}
+                  onClick={() => setZonaActiva("TODAS")}
+                >
+                  Todas
+                </button>
+
+                {zonasUnicas.map((zona) => (
+                  <button
+                    key={zona}
+                    type="button"
+                    className={`${baseFiltroBtn} whitespace-nowrap flex-shrink-0 ${
+                      esZonaActiva(zona) ? activoClasses : inactivoClasses
+                    }`}
+                    onClick={() => setZonaActiva(zona)}
+                  >
+                    {zona}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -196,16 +198,16 @@ function InfoCanchitas() {
 
           {/* Paginación */}
           {totalPaginas > 1 && (
-            <div className="flex items-center justify-center gap-4 pt-2">
+            <div className="flex flex-wrap items-center justify-center gap-2 md:gap-4 pt-2">
               <button
                 type="button"
                 onClick={() => setPagina((p) => Math.max(1, p - 1))}
                 disabled={pagina === 1}
-                className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-full border border-slate-300 px-3 md:px-4 py-2 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
               >
                 Anterior
               </button>
-              <span className="text-sm text-[#666]">
+              <span className="text-sm text-[#666] order-first md:order-none w-full md:w-auto text-center mb-2 md:mb-0">
                 Página{" "}
                 <span className="font-semibold text-[#0a0704]">{pagina}</span>{" "}
                 de {totalPaginas}
@@ -216,7 +218,7 @@ function InfoCanchitas() {
                   setPagina((p) => Math.min(totalPaginas, p + 1))
                 }
                 disabled={pagina === totalPaginas}
-                className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-full border border-slate-300 px-3 md:px-4 py-2 text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
               >
                 Siguiente
               </button>
