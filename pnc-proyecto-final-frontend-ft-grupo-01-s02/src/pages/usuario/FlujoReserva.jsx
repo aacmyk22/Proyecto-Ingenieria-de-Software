@@ -104,6 +104,26 @@ function FlujoReserva() {
   const [error, setError] = useState(null);
   const [pagoExitoso, setPagoExitoso] = useState(false);
 
+  // Estados de errores por campo (validaciones visuales)
+  const [erroresCampos, setErroresCampos] = useState({
+    zona: "",
+    lugar: "",
+    cancha: "",
+    fecha: "",
+    horas: "",
+    metodoPago: "",
+    numeroTarjeta: "",
+    vencimiento: "",
+    cvv: ""
+  });
+
+  // Estado para rastrear si el usuario intentó continuar (touched)
+  const [intentoContinuar, setIntentoContinuar] = useState({
+    paso1: false,
+    paso2: false,
+    paso3: false
+  });
+
   // Info de cancha seleccionada
   const [canchaInfo, setCanchaInfo] = useState({
     nombre: "",
@@ -324,41 +344,113 @@ function FlujoReserva() {
       })()
     : null;
 
-  // Validaciones
+  // Validaciones de formato
   const validarNumeroTarjeta = (num) => /^\d{16}$/.test(num);
   const validarVencimiento = (v) => /^(0[1-9]|1[0-2])\/\d{2}$/.test(v);
   const validarCVV = (c) => /^\d{3}$/.test(c);
 
-  // Validación por paso
-  const validarPaso1 = () => {
-    return zonaSeleccionada && lugarSeleccionado && canchaSeleccionada;
+  // Función para limpiar error de un campo específico
+  const limpiarErrorCampo = (campo) => {
+    setErroresCampos(prev => ({ ...prev, [campo]: "" }));
   };
 
-  const validarPaso2 = () => {
-    return selectedDate && selectedHours.length > 0;
+  // Validación por paso con mensajes descriptivos
+  const validarPaso1 = (mostrarErrores = false) => {
+    const errores = {};
+
+    if (!zonaSeleccionada) {
+      errores.zona = "Selecciona una zona para continuar";
+    }
+    if (!lugarSeleccionado) {
+      errores.lugar = "Selecciona un lugar deportivo";
+    }
+    if (!canchaSeleccionada) {
+      errores.cancha = "Selecciona una cancha disponible";
+    }
+
+    if (mostrarErrores) {
+      setErroresCampos(prev => ({ ...prev, ...errores }));
+    }
+
+    return Object.keys(errores).length === 0;
   };
 
-  const validarPaso3 = () => {
-    return (
-      metodoPagoSeleccionado &&
-      validarNumeroTarjeta(numeroTarjeta) &&
-      validarVencimiento(vencimiento) &&
-      validarCVV(cvv)
-    );
+  const validarPaso2 = (mostrarErrores = false) => {
+    const errores = {};
+
+    if (!selectedDate) {
+      errores.fecha = "Selecciona una fecha para tu reserva";
+    }
+    if (selectedHours.length === 0) {
+      errores.horas = "Selecciona al menos una hora";
+    }
+
+    if (mostrarErrores) {
+      setErroresCampos(prev => ({ ...prev, ...errores }));
+    }
+
+    return Object.keys(errores).length === 0;
+  };
+
+  const validarPaso3 = (mostrarErrores = false) => {
+    const errores = {};
+
+    if (!metodoPagoSeleccionado) {
+      errores.metodoPago = "Selecciona un método de pago";
+    }
+    if (!numeroTarjeta) {
+      errores.numeroTarjeta = "Ingresa el número de tarjeta";
+    } else if (!validarNumeroTarjeta(numeroTarjeta)) {
+      errores.numeroTarjeta = "El número debe tener 16 dígitos";
+    }
+    if (!vencimiento) {
+      errores.vencimiento = "Ingresa la fecha de vencimiento";
+    } else if (!validarVencimiento(vencimiento)) {
+      errores.vencimiento = "Formato inválido (MM/AA)";
+    }
+    if (!cvv) {
+      errores.cvv = "Ingresa el CVV";
+    } else if (!validarCVV(cvv)) {
+      errores.cvv = "Debe tener 3 dígitos";
+    }
+
+    if (mostrarErrores) {
+      setErroresCampos(prev => ({ ...prev, ...errores }));
+    }
+
+    return Object.keys(errores).length === 0;
+  };
+
+  // Verificar si el paso actual está completo (para habilitar/deshabilitar botón)
+  const pasoActualCompleto = () => {
+    if (pasoActual === 1) return validarPaso1(false);
+    if (pasoActual === 2) return validarPaso2(false);
+    if (pasoActual === 3) return validarPaso3(false);
+    return false;
   };
 
   // Navegación entre pasos
   const siguientePaso = () => {
     setError(null);
 
-    if (pasoActual === 1 && !validarPaso1()) {
-      setError("Por favor, selecciona zona, lugar y cancha para continuar.");
-      return;
+    if (pasoActual === 1) {
+      setIntentoContinuar(prev => ({ ...prev, paso1: true }));
+      if (!validarPaso1(true)) {
+        setError("Por favor, completa todos los campos requeridos.");
+        return;
+      }
+      // Limpiar errores del paso 1 al avanzar
+      setErroresCampos(prev => ({ ...prev, zona: "", lugar: "", cancha: "" }));
     }
 
-    if (pasoActual === 2 && !validarPaso2()) {
-      setError("Por favor, selecciona una fecha y al menos una hora.");
-      return;
+    if (pasoActual === 2) {
+      setIntentoContinuar(prev => ({ ...prev, paso2: true }));
+      if (!validarPaso2(true)) {
+        setError("Por favor, selecciona una fecha y al menos una hora.");
+        return;
+      }
+      // Limpiar errores del paso 2 al avanzar
+      setErroresCampos(prev => ({ ...prev, fecha: "", horas: "" }));
     }
 
     if (pasoActual < 3) {
@@ -375,7 +467,8 @@ function FlujoReserva() {
 
   // Procesar pago
   const handlePagar = async () => {
-    if (!validarPaso3()) {
+    setIntentoContinuar(prev => ({ ...prev, paso3: true }));
+    if (!validarPaso3(true)) {
       setError("Por favor, completa todos los datos de pago correctamente.");
       return;
     }
@@ -440,20 +533,33 @@ function FlujoReserva() {
       <div className="grid md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <Dropdown
+            id="zona"
             label="Zona"
             options={opcionesZonas}
             value={zonaSeleccionada}
-            onChange={setZonaSeleccionada}
+            onChange={(val) => {
+              setZonaSeleccionada(val);
+              limpiarErrorCampo("zona");
+            }}
             disabled={cargando}
+            required
+            error={intentoContinuar.paso1 ? erroresCampos.zona : ""}
           />
           <Dropdown
+            id="lugar"
             label="Lugar"
             options={opcionesLugares}
             value={lugarSeleccionado}
-            onChange={setLugarSeleccionado}
+            onChange={(val) => {
+              setLugarSeleccionado(val);
+              limpiarErrorCampo("lugar");
+            }}
             disabled={cargando || !zonaSeleccionada}
+            required
+            error={intentoContinuar.paso1 ? erroresCampos.lugar : ""}
           />
           <Dropdown
+            id="tipoCancha"
             label="Tipo de cancha (opcional)"
             options={opcionesTipoCancha}
             value={tipoCanchaSeleccionado}
@@ -461,11 +567,17 @@ function FlujoReserva() {
             disabled={cargando}
           />
           <Dropdown
+            id="cancha"
             label="Cancha"
             options={opcionesCanchas}
             value={canchaSeleccionada}
-            onChange={setCanchaSeleccionada}
+            onChange={(val) => {
+              setCanchaSeleccionada(val);
+              limpiarErrorCampo("cancha");
+            }}
             disabled={cargando || !lugarSeleccionado}
+            required
+            error={intentoContinuar.paso1 ? erroresCampos.cancha : ""}
           />
         </div>
 
@@ -507,13 +619,26 @@ function FlujoReserva() {
         {/* Calendario */}
         <div>
           <p className="text-sm font-medium text-[var(--canchitas-primary)] mb-3">
-            Fecha de reserva
+            Fecha de reserva <span className="text-[var(--canchitas-danger)]">*</span>
           </p>
-          <CalendarioReservas
-            fechasOcupadas={fechasOcupadas}
-            selectedDate={selectedDate}
-            onDateChange={setSelectedDate}
-          />
+          <div className={intentoContinuar.paso2 && erroresCampos.fecha ? "ring-2 ring-[var(--canchitas-danger)] rounded-lg" : ""}>
+            <CalendarioReservas
+              fechasOcupadas={fechasOcupadas}
+              selectedDate={selectedDate}
+              onDateChange={(date) => {
+                setSelectedDate(date);
+                limpiarErrorCampo("fecha");
+              }}
+            />
+          </div>
+          {intentoContinuar.paso2 && erroresCampos.fecha && (
+            <p className="mt-2 text-sm text-[var(--canchitas-danger)] flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {erroresCampos.fecha}
+            </p>
+          )}
           {selectedDate && (
             <p className="mt-3 text-sm text-[var(--canchitas-text-muted)]">
               Fecha: <span className="font-semibold text-[var(--canchitas-primary)]">
@@ -531,16 +656,29 @@ function FlujoReserva() {
         {/* Horarios */}
         <div>
           <p className="text-sm font-medium text-[var(--canchitas-primary)] mb-3">
-            Horarios disponibles
+            Horarios disponibles <span className="text-[var(--canchitas-danger)]">*</span>
           </p>
 
           {selectedDate ? (
             <>
-              <SelectorHoras
-                horasOcupadas={horasOcupadas}
-                horasSeleccionadas={selectedHours}
-                onHoraClick={toggleHora}
-              />
+              <div className={intentoContinuar.paso2 && erroresCampos.horas ? "ring-2 ring-[var(--canchitas-danger)] rounded-lg p-2" : ""}>
+                <SelectorHoras
+                  horasOcupadas={horasOcupadas}
+                  horasSeleccionadas={selectedHours}
+                  onHoraClick={(hora) => {
+                    toggleHora(hora);
+                    limpiarErrorCampo("horas");
+                  }}
+                />
+              </div>
+              {intentoContinuar.paso2 && erroresCampos.horas && (
+                <p className="mt-2 text-sm text-[var(--canchitas-danger)] flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {erroresCampos.horas}
+                </p>
+              )}
 
               {selectedHours.length > 0 && (
                 <div className="mt-4 bg-emerald-50 rounded-xl p-4 border border-emerald-200">
@@ -557,7 +695,7 @@ function FlujoReserva() {
               )}
             </>
           ) : (
-            <div className="bg-gray-50 rounded-xl p-8 text-center border border-gray-200">
+            <div className={`bg-gray-50 rounded-xl p-8 text-center border ${intentoContinuar.paso2 && erroresCampos.fecha ? "border-[var(--canchitas-danger)]" : "border-gray-200"}`}>
               <svg
                 className="w-12 h-12 mx-auto text-gray-400 mb-3"
                 fill="none"
@@ -655,11 +793,17 @@ function FlujoReserva() {
         {/* Formulario de pago */}
         <div className="space-y-4">
           <Dropdown
+            id="metodoPago"
             label="Método de pago"
             options={opcionesMetodoPago}
             value={metodoPagoSeleccionado}
-            onChange={setMetodoPagoSeleccionado}
+            onChange={(val) => {
+              setMetodoPagoSeleccionado(val);
+              limpiarErrorCampo("metodoPago");
+            }}
             disabled={cargando}
+            required
+            error={intentoContinuar.paso3 ? erroresCampos.metodoPago : ""}
           />
 
           <Input
@@ -668,8 +812,12 @@ function FlujoReserva() {
             placeholder="1234 5678 9012 3456"
             value={numeroTarjeta}
             maxLength={16}
-            onChange={(e) => setNumeroTarjeta(e.target.value.replace(/\D/g, ""))}
-            error={numeroTarjeta && !validarNumeroTarjeta(numeroTarjeta) ? "Debe tener 16 dígitos" : ""}
+            onChange={(e) => {
+              setNumeroTarjeta(e.target.value.replace(/\D/g, ""));
+              limpiarErrorCampo("numeroTarjeta");
+            }}
+            required
+            error={intentoContinuar.paso3 ? erroresCampos.numeroTarjeta : (numeroTarjeta && !validarNumeroTarjeta(numeroTarjeta) ? "Debe tener 16 dígitos" : "")}
           />
 
           <div className="grid grid-cols-2 gap-4">
@@ -685,8 +833,10 @@ function FlujoReserva() {
                   val = val + "/";
                 }
                 setVencimiento(val);
+                limpiarErrorCampo("vencimiento");
               }}
-              error={vencimiento && !validarVencimiento(vencimiento) ? "Formato MM/AA" : ""}
+              required
+              error={intentoContinuar.paso3 ? erroresCampos.vencimiento : (vencimiento && !validarVencimiento(vencimiento) ? "Formato MM/AA" : "")}
             />
             <Input
               id="cvv"
@@ -695,8 +845,12 @@ function FlujoReserva() {
               placeholder="123"
               value={cvv}
               maxLength={3}
-              onChange={(e) => setCvv(e.target.value.replace(/\D/g, ""))}
-              error={cvv && !validarCVV(cvv) ? "3 dígitos" : ""}
+              onChange={(e) => {
+                setCvv(e.target.value.replace(/\D/g, ""));
+                limpiarErrorCampo("cvv");
+              }}
+              required
+              error={intentoContinuar.paso3 ? erroresCampos.cvv : (cvv && !validarCVV(cvv) ? "3 dígitos" : "")}
             />
           </div>
 
@@ -795,14 +949,20 @@ function FlujoReserva() {
             )}
 
             {pasoActual < 3 ? (
-              <Button variant="primary" onClick={siguientePaso} disabled={cargando}>
+              <Button
+                variant="primary"
+                onClick={siguientePaso}
+                disabled={cargando || !pasoActualCompleto()}
+                title={!pasoActualCompleto() ? "Completa todos los campos requeridos" : ""}
+              >
                 Siguiente →
               </Button>
             ) : (
               <Button
                 variant="primary"
                 onClick={handlePagar}
-                disabled={cargando || !validarPaso3()}
+                disabled={cargando || !validarPaso3(false)}
+                title={!validarPaso3(false) ? "Completa todos los datos de pago" : ""}
               >
                 {cargando ? "Procesando..." : `Pagar $${calcularTotal().toFixed(2)}`}
               </Button>

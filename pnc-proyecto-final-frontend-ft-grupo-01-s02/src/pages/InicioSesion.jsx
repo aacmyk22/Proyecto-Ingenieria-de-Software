@@ -145,8 +145,12 @@ function InicioSesion() {
               type="email"
               placeholder="tu.correo@ejemplo.com"
               value={correo}
-              onChange={(e) => setCorreo(e.target.value)}
+              onChange={(e) => {
+                setCorreo(e.target.value);
+                if (errores.correo) setErrores(prev => ({ ...prev, correo: "" }));
+              }}
               error={errores.correo}
+              required
             />
 
             {/* Contraseña con icono de mostrar/ocultar */}
@@ -156,8 +160,12 @@ function InicioSesion() {
               type={mostrarContrasena ? "text" : "password"}
               placeholder="Ingresa tu contraseña"
               value={contrasena}
-              onChange={(e) => setContrasena(e.target.value)}
+              onChange={(e) => {
+                setContrasena(e.target.value);
+                if (errores.contrasena) setErrores(prev => ({ ...prev, contrasena: "" }));
+              }}
               error={errores.contrasena}
+              required
               suffix={
                 <button
                   type="button"

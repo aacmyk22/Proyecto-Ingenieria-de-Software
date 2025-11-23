@@ -133,8 +133,12 @@ function Registro() {
               placeholder="Ingresa tu nombre"
               value={nombre}
               maxLength={30}
-              onChange={(e) => setNombre(e.target.value)}
+              onChange={(e) => {
+                setNombre(e.target.value);
+                if (errores.nombre) setErrores(prev => ({ ...prev, nombre: "" }));
+              }}
               error={errores.nombre}
+              required
             />
 
             <Input
@@ -144,8 +148,12 @@ function Registro() {
               placeholder="Ingresa tu apellido"
               value={apellido}
               maxLength={30}
-              onChange={(e) => setApellido(e.target.value)}
+              onChange={(e) => {
+                setApellido(e.target.value);
+                if (errores.apellido) setErrores(prev => ({ ...prev, apellido: "" }));
+              }}
               error={errores.apellido}
+              required
             />
 
             <Input
@@ -155,8 +163,12 @@ function Registro() {
               placeholder="tu.correo@ejemplo.com"
               value={correo}
               maxLength={50}
-              onChange={(e) => setCorreo(e.target.value)}
+              onChange={(e) => {
+                setCorreo(e.target.value);
+                if (errores.correo) setErrores(prev => ({ ...prev, correo: "" }));
+              }}
               error={errores.correo}
+              required
             />
 
             {/* Contraseña con icono de mostrar/ocultar */}
@@ -167,8 +179,12 @@ function Registro() {
               placeholder="Crea una contraseña segura"
               value={contrasena}
               maxLength={50}
-              onChange={(e) => setContrasena(e.target.value)}
+              onChange={(e) => {
+                setContrasena(e.target.value);
+                if (errores.contrasena) setErrores(prev => ({ ...prev, contrasena: "" }));
+              }}
               error={errores.contrasena}
+              required
               suffix={
                 <button
                   type="button"
