@@ -79,11 +79,11 @@ function InicioSesion() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--canchitas-bg)] flex flex-col md:flex-row relative">
+    <div className="min-h-screen bg-[var(--canchitas-bg)] flex flex-col md:flex-row relative overflow-x-hidden">
       {/* Botón volver */}
       <button
         onClick={() => navigate(-1)}
-        className="absolute top-4 left-4 p-2 rounded-full bg-[var(--canchitas-primary)] text-white hover:bg-black/80 z-50"
+        className="absolute top-4 left-4 p-2 rounded-full bg-[var(--canchitas-primary)] text-white hover:bg-black/80 z-50 min-w-[44px] min-h-[44px] flex items-center justify-center"
         aria-label="Volver"
       >
         <svg

@@ -211,28 +211,28 @@ function MisReservaciones() {
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                      <div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+                      <div className="flex sm:block justify-between items-center sm:items-start py-2 sm:py-0 border-b sm:border-0 border-gray-100">
                         <p className="text-[var(--canchitas-text-muted)]">Fecha</p>
-                        <p className="font-medium text-[var(--canchitas-text)]">
+                        <p className="font-medium text-[var(--canchitas-text)] text-right sm:text-left">
                           {formatearFecha(reserva.fechaReserva)}
                         </p>
                       </div>
-                      <div>
+                      <div className="flex sm:block justify-between items-center sm:items-start py-2 sm:py-0 border-b sm:border-0 border-gray-100">
                         <p className="text-[var(--canchitas-text-muted)]">Horario</p>
-                        <p className="font-medium text-[var(--canchitas-text)]">
+                        <p className="font-medium text-[var(--canchitas-text)] text-right sm:text-left">
                           {reserva.horaEntrada} - {reserva.horaSalida}
                         </p>
                       </div>
-                      <div>
+                      <div className="flex sm:block justify-between items-center sm:items-start py-2 sm:py-0 border-b sm:border-0 border-gray-100">
                         <p className="text-[var(--canchitas-text-muted)]">Método de pago</p>
-                        <p className="font-medium text-[var(--canchitas-text)]">
+                        <p className="font-medium text-[var(--canchitas-text)] text-right sm:text-left">
                           {reserva.metodoPago}
                         </p>
                       </div>
-                      <div>
+                      <div className="flex sm:block justify-between items-center sm:items-start py-2 sm:py-0">
                         <p className="text-[var(--canchitas-text-muted)]">Total</p>
-                        <p className="font-bold text-[var(--canchitas-primary)] text-lg">
+                        <p className="font-bold text-[var(--canchitas-primary)] text-lg text-right sm:text-left">
                           ${reserva.precioTotal?.toFixed(2)}
                         </p>
                       </div>
@@ -243,7 +243,7 @@ function MisReservaciones() {
                   {reserva.estadoReserva === 'PENDIENTE' && (
                     <button
                       onClick={() => eliminarReserva(reserva.idReserva)}
-                      className="px-4 py-2 border border-red-300 text-red-700 rounded-xl hover:bg-red-50 transition-colors text-sm font-medium"
+                      className="w-full sm:w-auto px-4 py-3 sm:py-2 border border-red-300 text-red-700 rounded-xl hover:bg-red-50 transition-colors text-sm font-medium min-h-[44px]"
                     >
                       Cancelar reserva
                     </button>

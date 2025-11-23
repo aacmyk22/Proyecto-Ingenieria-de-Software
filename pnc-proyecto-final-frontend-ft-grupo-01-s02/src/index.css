@@ -44,10 +44,174 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background-color: var(--canchitas-bg);
   color: var(--canchitas-text);
+  overflow-x: hidden;
+}
+
+/* Prevenir scroll horizontal en todo el documento */
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 main {
   width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* =================================
+   RESPONSIVO - NAVBAR
+   ================================= */
+
+.navbar-container {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  width: 100%;
+}
+
+/* =================================
+   RESPONSIVO - ELEMENTOS TÁCTILES
+   ================================= */
+
+/* Tamaño mínimo para elementos táctiles (44x44px recomendado) */
+@media (max-width: 768px) {
+  button,
+  a,
+  .btn,
+  input[type="checkbox"],
+  input[type="radio"],
+  select {
+    min-height: 44px;
+  }
+
+  /* Inputs más grandes en móvil */
+  .input-field {
+    padding: 0.875rem 1rem;
+    font-size: 16px; /* Previene zoom en iOS */
+  }
+
+  /* Botones más grandes en móvil */
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost {
+    padding: 0.75rem 1.5rem;
+    min-height: 48px;
+  }
+
+  /* Dropdowns más accesibles */
+  select {
+    padding: 0.875rem 1rem;
+    font-size: 16px;
+  }
+}
+
+/* =================================
+   RESPONSIVO - CONTENEDORES
+   ================================= */
+
+/* Contenedor responsivo con padding seguro */
+.responsive-container {
+  width: 100%;
+  max-width: 100%;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  box-sizing: border-box;
+}
+
+@media (min-width: 640px) {
+  .responsive-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Scroll horizontal controlado para contenedores específicos */
+.scroll-x-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.scroll-x-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.scroll-x-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.scroll-x-container::-webkit-scrollbar-thumb {
+  background: var(--canchitas-accent);
+  border-radius: 3px;
+}
+
+/* =================================
+   RESPONSIVO - GRIDS Y FLEXBOX
+   ================================= */
+
+/* Grid responsivo que no se rompe en móvil */
+.grid-responsive {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 640px) {
+  .grid-responsive {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-responsive {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Flex que envuelve en móvil */
+.flex-wrap-mobile {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* =================================
+   RESPONSIVO - IMÁGENES
+   ================================= */
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* =================================
+   RESPONSIVO - TABLAS (si las hay)
+   ================================= */
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* =================================
+   RESPONSIVO - TEXTO
+   ================================= */
+
+/* Evitar que el texto se rompa de forma extraña */
+.text-responsive {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 /* Contenedor de secciones principales (como los bloques de login/dashboard) */
