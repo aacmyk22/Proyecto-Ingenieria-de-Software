@@ -203,11 +203,76 @@ main {
 
 .input-field--error {
   border-color: var(--canchitas-danger);
+  background-color: rgba(224, 36, 36, 0.03);
+}
+
+.input-field--error:focus {
+  border-color: var(--canchitas-danger);
+  box-shadow: 0 0 0 3px rgba(224, 36, 36, 0.2);
 }
 
 .input-error-text {
   font-size: 0.8rem;
   color: var(--canchitas-danger);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+  animation: errorFadeIn 0.2s ease-out;
+}
+
+/* =================================
+   DROPDOWN / SELECT VALIDACIONES
+   ================================= */
+
+.dropdown-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown--error {
+  border-color: var(--canchitas-danger) !important;
+  background-color: rgba(224, 36, 36, 0.03);
+}
+
+.dropdown--error:focus {
+  border-color: var(--canchitas-danger) !important;
+  box-shadow: 0 0 0 3px rgba(224, 36, 36, 0.2);
+}
+
+.dropdown-error-text {
+  font-size: 0.8rem;
+  color: var(--canchitas-danger);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+  animation: errorFadeIn 0.2s ease-out;
+}
+
+/* =================================
+   ANIMACIONES DE VALIDACIÓN
+   ================================= */
+
+@keyframes errorFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.shake-error {
+  animation: shake 0.3s ease-in-out;
 }
 
 .input-with-icon {
