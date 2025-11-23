@@ -53,12 +53,6 @@ html, body {
   overflow-x: hidden;
 }
 
-main {
-  width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
 /* =================================
    RESPONSIVO - NAVBAR
    ================================= */
