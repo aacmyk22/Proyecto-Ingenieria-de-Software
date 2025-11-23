@@ -1,23 +1,8 @@
-// src/pages/admin/AllReservaciones.jsx  (o donde lo tengas)
-
+// src/pages/admin/AllReservaciones.jsx
 import { useState, useEffect, useRef } from "react";
 import { FaCalendarAlt } from "react-icons/fa";
-
-// Mock de datos para pruebas
-const mockReservas = [
-  { idReserva: 1, fechaReserva: "2025-06-09", fechaCreacion: "2025-06-05", horaEntrada: "17:00", horaSalida: "18:00", precioTotal: 35.0, estadoReserva: "PENDIENTE", usuario: "Carlos Dominguez", lugar: "Cancha #6" },
-  { idReserva: 2, fechaReserva: "2025-06-25", fechaCreacion: "2025-06-09", horaEntrada: "17:00", horaSalida: "18:00", precioTotal: 40.0, estadoReserva: "FINALIZADA", usuario: "María López", lugar: "Cancha #3" },
-  { idReserva: 3, fechaReserva: "2025-07-01", fechaCreacion: "2025-06-20", horaEntrada: "10:00", horaSalida: "11:30", precioTotal: 50.0, estadoReserva: "PENDIENTE", usuario: "Juan Pérez", lugar: "Cancha #1" },
-  { idReserva: 4, fechaReserva: "2025-07-05", fechaCreacion: "2025-06-22", horaEntrada: "14:00", horaSalida: "15:00", precioTotal: 45.0, estadoReserva: "FINALIZADA", usuario: "Ana García", lugar: "Cancha #2" },
-  { idReserva: 5, fechaReserva: "2025-07-10", fechaCreacion: "2025-06-25", horaEntrada: "12:00", horaSalida: "13:00", precioTotal: 55.0, estadoReserva: "PENDIENTE", usuario: "Luis Martínez", lugar: "Cancha #4" },
-  { idReserva: 6, fechaReserva: "2025-07-12", fechaCreacion: "2025-06-30", horaEntrada: "09:00", horaSalida: "10:00", precioTotal: 30.0, estadoReserva: "FINALIZADA", usuario: "Patricia Torres", lugar: "Cancha #5" },
-  { idReserva: 7, fechaReserva: "2025-07-15", fechaCreacion: "2025-07-01", horaEntrada: "16:00", horaSalida: "17:00", precioTotal: 38.0, estadoReserva: "PENDIENTE", usuario: "Ricardo Ruiz", lugar: "Cancha #6" },
-  { idReserva: 8, fechaReserva: "2025-07-20", fechaCreacion: "2025-07-03", horaEntrada: "18:00", horaSalida: "19:30", precioTotal: 60.0, estadoReserva: "FINALIZADA", usuario: "Mónica Díaz", lugar: "Cancha #3" },
-  { idReserva: 9, fechaReserva: "2025-07-22", fechaCreacion: "2025-07-05", horaEntrada: "11:00", horaSalida: "12:00", precioTotal: 42.0, estadoReserva: "PENDIENTE", usuario: "Diego Fernández", lugar: "Cancha #1" },
-  { idReserva: 10, fechaReserva: "2025-07-25", fechaCreacion: "2025-07-10", horaEntrada: "13:00", horaSalida: "14:00", precioTotal: 48.0, estadoReserva: "FINALIZADA", usuario: "Laura Sánchez", lugar: "Cancha #2" },
-  { idReserva: 11, fechaReserva: "2025-07-28", fechaCreacion: "2025-07-12", horaEntrada: "15:00", horaSalida: "16:00", precioTotal: 52.0, estadoReserva: "PENDIENTE", usuario: "Fernando Gómez", lugar: "Cancha #4" },
-  { idReserva: 12, fechaReserva: "2025-07-30", fechaCreacion: "2025-07-15", horaEntrada: "17:30", horaSalida: "18:30", precioTotal: 58.0, estadoReserva: "FINALIZADA", usuario: "Sofía Castillo", lugar: "Cancha #5" },
-];
+import api from "../../config/api";
+import { useAuth } from "../../context/AuthProvider";
 
 function getEstadoStyles(estado = "") {
   const normalized = estado.toUpperCase();
@@ -30,24 +15,64 @@ function getEstadoStyles(estado = "") {
   return "bg-slate-50 text-slate-700 border-slate-200";
 }
 
+// Normaliza fechas tipo "2025-07-10" o "2025-07-10T00:00:00"
+const normalizarFecha = (fecha) => {
+  if (!fecha) return "";
+  return fecha.split("T")[0];
+};
+
 export default function AllReservaciones() {
+  const { token } = useAuth();
   const [reservas, setReservas] = useState([]);
   const [filtroFecha, setFiltroFecha] = useState("");
   const [pagina, setPagina] = useState(1);
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState(null);
+
   const porPagina = 5;
   const dateInputRef = useRef(null);
 
+  // Cargar reservas desde el backend
   useEffect(() => {
-    setReservas(mockReservas);
-  }, []);
+    const cargarReservas = async () => {
+      if (!token) return; // por si alguien entra sin loguearse
+
+      try {
+        setCargando(true);
+        setError(null);
+
+        // Usa tu axios config (baseURL + Authorization)
+        const response = await api.get("/api/reservas");
+
+        // El backend devuelve una lista de ReservaResponseDTO
+        // La guardamos tal cual, solo nos aseguramos de que sea array
+        const data = Array.isArray(response.data) ? response.data : [];
+        setReservas(data);
+      } catch (err) {
+        console.error("Error cargando reservas:", err);
+        const msg =
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.message ||
+          "Error al cargar reservaciones";
+        setError(msg);
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    cargarReservas();
+  }, [token]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [pagina]);
 
-  // Filtrar por fecha
+  // Filtrar por fecha (comparando solo YYYY-MM-DD)
   const reservasFiltradas = filtroFecha
-    ? reservas.filter((r) => r.fechaReserva === filtroFecha)
+    ? reservas.filter(
+        (r) => normalizarFecha(r.fechaReserva) === filtroFecha
+      )
     : reservas;
 
   // Paginación
@@ -68,6 +93,11 @@ export default function AllReservaciones() {
               <p className="text-sm text-[var(--canchitas-text-muted)] mt-1">
                 Revisa todas las reservaciones registradas en la plataforma.
               </p>
+              {error && (
+                <p className="text-sm text-red-600 mt-2">
+                  {error}
+                </p>
+              )}
             </div>
 
             {/* Filtro por fecha */}
@@ -114,7 +144,13 @@ export default function AllReservaciones() {
 
           {/* Lista de reservas */}
           <div className="mt-4 space-y-4">
-            {actuales.length === 0 ? (
+            {cargando ? (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-6 text-center">
+                <p className="text-sm text-[var(--canchitas-text-muted)]">
+                  Cargando reservaciones...
+                </p>
+              </div>
+            ) : actuales.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center">
                 <p className="text-sm text-[var(--canchitas-text-muted)]">
                   No hay reservaciones para la fecha seleccionada.
@@ -123,7 +159,7 @@ export default function AllReservaciones() {
             ) : (
               actuales.map((reserva) => {
                 const estadoClasses = getEstadoStyles(reserva.estadoReserva);
-                const total = Number(reserva.precioTotal).toFixed(2);
+                const total = Number(reserva.precioTotal || 0).toFixed(2);
 
                 return (
                   <article
@@ -137,7 +173,10 @@ export default function AllReservaciones() {
                           Reserva #{reserva.idReserva}
                         </p>
                         <p className="text-sm font-semibold text-[var(--canchitas-primary)]">
-                          {reserva.lugar}
+                          {reserva.nombreLugar}{" "}
+                          {reserva.nombreCancha
+                            ? `- ${reserva.nombreCancha}`
+                            : ""}
                         </p>
                       </div>
                       <span
@@ -155,12 +194,14 @@ export default function AllReservaciones() {
                         <p className="text-[var(--canchitas-text-muted)] text-xs uppercase font-medium tracking-wide">
                           Fecha de reserva
                         </p>
-                        <p className="font-medium">{reserva.fechaReserva}</p>
+                        <p className="font-medium">
+                          {normalizarFecha(reserva.fechaReserva)}
+                        </p>
 
                         <p className="mt-2 text-[var(--canchitas-text-muted)] text-xs uppercase font-medium tracking-wide">
                           Fecha de compra
                         </p>
-                        <p>{reserva.fechaCreacion}</p>
+                        <p>{normalizarFecha(reserva.fechaCreacion)}</p>
                       </div>
 
                       <div className="space-y-1">
@@ -174,7 +215,7 @@ export default function AllReservaciones() {
                         <p className="mt-2 text-[var(--canchitas-text-muted)] text-xs uppercase font-medium tracking-wide">
                           Usuario
                         </p>
-                        <p>{reserva.usuario}</p>
+                        <p>{reserva.nombreUsuario}</p>
                       </div>
 
                       <div className="space-y-1">
@@ -210,7 +251,9 @@ export default function AllReservaciones() {
                 de {totalPaginas}
               </span>
               <button
-                onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+                onClick={() =>
+                  setPagina((p) => Math.min(totalPaginas, p + 1))
+                }
                 disabled={pagina === totalPaginas}
                 className="rounded-full border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
               >
