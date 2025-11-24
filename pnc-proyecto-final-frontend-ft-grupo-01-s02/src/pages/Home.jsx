@@ -29,15 +29,12 @@ function Home() {
   return (
     <main className="w-full">
       {/* Hero section */}
-      <section className="relative h-[550px] w-full">
-        <img
-          src={home4}
-          alt="Fondo SportMatch"
-          className="w-full h-full object-cover"
-        />
-
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 text-white">
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">
+      <section
+        className="relative w-full min-h-[450px] sm:min-h-[500px] md:min-h-[550px] bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${home4})` }}
+      >
+        <div className="flex flex-col items-center justify-center text-center px-6 py-24 sm:py-28 md:py-36 text-white min-h-[450px] sm:min-h-[500px] md:min-h-[550px]">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-6 leading-tight">
             Tu partido, a un clic de distancia
           </h1>
 
