@@ -4,7 +4,7 @@
 
 ---
 
-## 📋 Tabla de Contenidos
+##  Tabla de Contenidos
 
 1. [Visión General](#visión-general)
 2. [Documentación de Lógica de Negocio](#documentación-de-lógica-de-negocio)
@@ -17,7 +17,7 @@
 
 ---
 
-## 🎯 Visión General
+##  Visión General
 
 SportMatch es un sistema integral de reserva de canchas deportivas que permite a los usuarios:
 - Registrarse e iniciar sesión
@@ -33,7 +33,7 @@ Los administradores pueden:
 
 ---
 
-## 📚 Documentación de Lógica de Negocio
+##  Documentación de Lógica de Negocio
 
 ### 1. Diagramas UML
 
@@ -55,14 +55,15 @@ usecaseDiagram
 
     Administrador --> (Gestionar canchas)
     Administrador --> (Agregar nueva cancha)
-    Administrador --> (Aprobar reservas)
     Administrador --> (Ver todas las reservas)
+    Administrador --> (Editar detalles de cancha)
+    Administrador --> (Gestionar usuarios)
     Administrador --> (Editar configuración del sistema)
 ```
 
 **Descripción de actores:**
-- **Usuario**: Cliente que realiza reservas de canchas deportivas
-- **Administrador**: Gestor del sistema, responsable de mantener el catálogo de canchas y supervisar reservaciones
+- **Usuario**: Cliente autenticado que realiza reservas de canchas deportivas, consulta disponibilidad, edita y cancela sus reservas, y visualiza su historial.
+- **Administrador**: Gestor del sistema responsable de mantener el catálogo de canchas, gestionar usuarios, supervisar todas las reservaciones y configurar parámetros del sistema.
 
 #### 1.2 Diagrama de Secuencia - Flujo de Autenticación
 Interacción entre componentes durante el proceso de login:
@@ -137,7 +138,7 @@ flowchart TD
 
 ---
 
-## 🔄 Documentación de Procesos
+## Documentación de Procesos
 
 ### 1. Diagramas de Flujo - Procesos Clave
 
@@ -279,7 +280,7 @@ FIN FUNCIÓN
 
 ---
 
-## 📖 Documentación de Dominio
+##  Documentación de Dominio
 
 ### 1. Glosario de Términos (Vocabulario Ubiquo)
 
@@ -444,7 +445,7 @@ Resultado: Conflicto resuelto, usuario notificado.
 
 ---
 
-## 🛠️ Stack Tecnológico
+##  Stack Tecnológico
 
 ### Frontend
 - **React 19** - Framework UI
@@ -467,7 +468,7 @@ Resultado: Conflicto resuelto, usuario notificado.
 
 ---
 
-## 📁 Estructura del Proyecto
+##  Estructura del Proyecto
 
 ```
 Proyecto-Ingenieria-de-Software/
@@ -529,7 +530,7 @@ Proyecto-Ingenieria-de-Software/
 
 ---
 
-## 🚀 Instalación y Ejecución
+##  Instalación y Ejecución
 
 ### Requisitos Previos
 - Node.js 18+ 
@@ -585,7 +586,7 @@ npm run build
 
 ---
 
-## 🔄 Flujos Principales del Sistema
+## Flujos Principales del Sistema
 
 ### Flujo 1: Autenticación
 **Estado Inicial:** Usuario no autenticado
@@ -672,20 +673,20 @@ npm run build
 
 ---
 
-## 📋 Características Clave
+##  Características Clave
 
-✅ **Autenticación JWT** - Tokens seguros por sesión
-✅ **Control de Roles** - Rutas protegidas para admin y usuario
-✅ **Sistema de Filtros** - Búsqueda multi-nivel (zona → lugar → tipo)
-✅ **Calendario Interactivo** - Selección visual de fechas
-✅ **Validaciones de Negocio** - Máx 3 reservas, sin solapamiento
-✅ **Responsive Design** - TailwindCSS + DaisyUI
-✅ **Componentes Reutilizables** - Code splitting y maintainability
-✅ **Manejo de Estados** - Context API para auth y datos globales
+ **Autenticación JWT** - Tokens seguros por sesión
+ **Control de Roles** - Rutas protegidas para admin y usuario
+ **Sistema de Filtros** - Búsqueda multi-nivel (zona → lugar → tipo)
+ **Calendario Interactivo** - Selección visual de fechas
+ **Validaciones de Negocio** - Máx 3 reservas, sin solapamiento
+ **Responsive Design** - TailwindCSS + DaisyUI
+ **Componentes Reutilizables** - Code splitting y maintainability
+ **Manejo de Estados** - Context API para auth y datos globales
 
 ---
 
-## 🔐 Seguridad
+##  Seguridad
 
 - Validación de email y contraseña en frontend y backend
 - JWT para autenticación stateless
@@ -696,7 +697,7 @@ npm run build
 
 ---
 
-## 📚 Referencias y Documentación Adicional
+##  Referencias y Documentación Adicional
 
 - `documentacion.md` - Documentación técnica detallada del frontend
 - Diagrama de secuencia - Flujo de autenticación
@@ -705,14 +706,14 @@ npm run build
 
 ---
 
-## 👥 Roles del Proyecto
+##  Roles del Proyecto
 
 - **Usuario (CLIENTE)**: Puede crear, editar y cancelar reservas. Ver historial.
 - **Administrador (ADMIN)**: Gestión completa de canchas, reservas y usuarios.
 
 ---
 
-## 📝 Notas Importantes
+##  Notas Importantes
 
 - El proyecto usa **React Router v7** para SPA (Single Page Application)
 - Estilos con **TailwindCSS v4** y componentes de **DaisyUI v5**
@@ -722,7 +723,7 @@ npm run build
 
 ---
 
-## 🚀 Próximas Mejoras Sugeridas
+##  Próximas Mejoras Sugeridas
 
 1. Implementar **TypeScript** para mayor robustez de tipos
 2. Agregar **tests unitarios** (Vitest) y **E2E** (Cypress/Playwright)
