@@ -41,24 +41,44 @@ Los administradores pueden:
 Actores principales y sus interacciones con el sistema:
 
 ```mermaid
-usecaseDiagram
-    actor Usuario
-    actor Administrador
+flowchart TB
+    subgraph Actores
+        U[Usuario]
+        A[Administrador]
+    end
 
-    Usuario --> (Registrarse)
-    Usuario --> (Iniciar sesión)
-    Usuario --> (Ver canchas disponibles)
-    Usuario --> (Crear reserva)
-    Usuario --> (Editar reserva)
-    Usuario --> (Cancelar reserva)
-    Usuario --> (Ver historial de reservas)
+    subgraph Usuario_Casos[Casos del Usuario]
+        CU1((Registrarse))
+        CU2((Iniciar sesión))
+        CU3((Ver canchas disponibles))
+        CU4((Crear reserva))
+        CU5((Editar reserva))
+        CU6((Cancelar reserva))
+        CU7((Ver historial de reservas))
+    end
 
-    Administrador --> (Gestionar canchas)
-    Administrador --> (Agregar nueva cancha)
-    Administrador --> (Ver todas las reservas)
-    Administrador --> (Editar detalles de cancha)
-    Administrador --> (Gestionar usuarios)
-    Administrador --> (Editar configuración del sistema)
+    subgraph Admin_Casos[Casos del Administrador]
+        CA1((Gestionar canchas))
+        CA2((Agregar nueva cancha))
+        CA3((Aprobar reservas))
+        CA4((Ver todas las reservas))
+        CA5((Editar configuración del sistema))
+    end
+
+    U --> CU1
+    U --> CU2
+    U --> CU3
+    U --> CU4
+    U --> CU5
+    U --> CU6
+    U --> CU7
+
+    A --> CA1
+    A --> CA2
+    A --> CA3
+    A --> CA4
+    A --> CA5
+
 ```
 
 **Descripción de actores:**
